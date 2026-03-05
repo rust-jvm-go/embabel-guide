@@ -47,3 +47,5 @@ scripts/user-config/application-*.yml
 
 # Runtime artifacts
 *.pid
+
+.metals

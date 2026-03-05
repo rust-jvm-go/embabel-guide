@@ -473,7 +473,7 @@ docker compose --profile java down --remove-orphans
 | Variable           | Default                        | Description                                      |
 |--------------------|--------------------------------|--------------------------------------------------|
 | `COMPOSE_PROFILES` | `java`                         | Set to empty to run Neo4j only (no Java service) |
-| `NEO4J_VERSION`    | `2025.10.1-community-bullseye` | Neo4j Docker image tag                           |
+| `NEO4J_VERSION`    | `2025.12.1` | Neo4j Docker image tag                           |
 | `NEO4J_USERNAME`   | `neo4j`                        | Neo4j username                                   |
 | `NEO4J_PASSWORD`   | `brahmsian`                    | Neo4j password                                   |
 | `NEO4J_HTTP_PORT`  | `7474`                         | Neo4j HTTP port                                  |

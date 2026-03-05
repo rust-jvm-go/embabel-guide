@@ -11,7 +11,7 @@ jobs:
 
     services:
       neo4j:
-        image: neo4j:2025.10.1-community-bullseye
+        image: neo4j:2025.12.1
         env:
           NEO4J_AUTH: neo4j/testpassword
           NEO4J_PLUGINS: '["apoc"]'

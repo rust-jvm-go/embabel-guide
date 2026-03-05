@@ -1,6 +1,6 @@
 services:
   neo4j:
-    image: neo4j:${NEO4J_VERSION:-2025.10.1-community-bullseye}
+    image: neo4j:${NEO4J_VERSION:-2025.12.1}
     container_name: embabel-neo4j
     ports:
       - "${NEO4J_HTTP_PORT:-7474}:7474"   # HTTP
@@ -28,7 +28,7 @@ services:
   neo4j-init:
     profiles:
       - init
-    image: neo4j:${NEO4J_VERSION:-2025.10.1-community-bullseye}
+    image: neo4j:${NEO4J_VERSION:-2025.12.1}
     container_name: embabel-neo4j-init
     depends_on:
       neo4j:
