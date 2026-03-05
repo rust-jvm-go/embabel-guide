@@ -49,3 +49,6 @@ scripts/user-config/application-*.yml
 *.pid
 
 .metals
+
+docs/embabel-agent-guide.html
+docs/Embabel-Neo4j-RAG-Developer-Guide.md

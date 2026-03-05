@@ -1,7 +1,6 @@
 // Delete data
 // You have been warned!
 
-
 // Delete all ingested content
 MATCH(c:ContentElement)
 DETACH DELETE c;
