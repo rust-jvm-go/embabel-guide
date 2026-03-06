@@ -3,6 +3,9 @@
 echo Checking environment variables...
 set OPENAI_KEY_MISSING=false
 set ANTHROPIC_KEY_MISSING=false
+set OLLAMA_AVAILABLE=false
+set OLLAMA_BASE_URL=%SPRING_AI_OLLAMA_BASE_URL%
+if "%OLLAMA_BASE_URL%"=="" set OLLAMA_BASE_URL=http://localhost:11434
 
 if "%OPENAI_API_KEY%"=="" (
     echo OPENAI_API_KEY environment variable is not set
@@ -24,9 +27,16 @@ if "%ANTHROPIC_API_KEY%"=="" (
     echo ANTHROPIC_API_KEY set: Claude models are available
 )
 
-if "%OPENAI_KEY_MISSING%"=="true" if "%ANTHROPIC_KEY_MISSING%"=="true" (
-    echo ERROR: Both OPENAI_API_KEY and ANTHROPIC_API_KEY are missing.
-    echo At least one API key is required to use language models.
-    echo Please set at least one of these keys before running the application.
+curl -fsS --max-time 3 "%OLLAMA_BASE_URL%/api/tags" >nul 2>&1
+if "%ERRORLEVEL%"=="0" (
+    echo Ollama is reachable at %OLLAMA_BASE_URL%
+    set OLLAMA_AVAILABLE=true
+) else (
+    echo Ollama is not reachable at %OLLAMA_BASE_URL%
+)
+
+if "%OPENAI_KEY_MISSING%"=="true" if "%ANTHROPIC_KEY_MISSING%"=="true" if "%OLLAMA_AVAILABLE%"=="false" (
+    echo ERROR: OpenAI, Anthropic, and Ollama are all unavailable.
+    echo Configure at least one supported model provider before running the application.
     exit /b 1
 )

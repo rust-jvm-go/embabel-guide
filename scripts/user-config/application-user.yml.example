@@ -9,7 +9,7 @@ guide:
   projects-path: ./embabel-projects
   default-persona: adaptive
   chat-llm:
-    model: gpt-4.1-mini
+    model: kimi-k2.5:cloud
   content-chunker:
     include-section-title-in-chunk: false
     max-chunk-size: 4000
