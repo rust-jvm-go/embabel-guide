@@ -560,3 +560,24 @@ To kill the server:
 ```aiignore
 lsof -ti:1337 | xargs kill -9
 ```
+
+## Application Startup Reference
+
+| Method | Command | Notes |
+|--------|---------|-------|
+| **Interactive shell helper (Linux/macOS)** | `./scripts/shell.sh` | Sets `AGENT_APPLICATION` automatically and runs `scripts/support/agent.sh`, which in turn executes `./mvnw -f pom.xml -Dmaven.test.skip=true spring-boot:run`. Uses cached Maven snapshots unless you opt in to `-U` (see `MAVEN_UPDATE_SNAPSHOTS`). |
+| **Interactive shell helper (Windows)** | `scripts/shell.cmd` | Windows-friendly wrapper that mirrors `shell.sh`. Configure `JAVA_HOME` and other prerequisites in PowerShell/CMD before launching. |
+| **Direct Maven (from repo root)** | `./mvnw spring-boot:run` | Run directly when you need full control (e.g., enabling tests). Add `-Dmaven.test.skip=true` for faster startup or `-Dspring-boot.run.arguments=...` to pass CLI args. |
+| **Direct Maven (with tests skipped)** | `./mvnw -DskipTests spring-boot:run` | Useful for IDE-integrated workflows that still need Maven to build Kotlin + generated sources before attach. |
+| **Docker Compose** | `docker compose --profile java up --build -d` | Builds and runs the `guide` container plus Neo4j. Use when you want a fully containerized runtime or when sharing a consistent environment. |
+| **Neo4j only (pair with local Maven run)** | `docker compose up neo4j -d` | Starts only the database so you can run the Spring Boot app locally via Maven/IDE. |
+
+### Environment variables & caveats
+
+1. **`AGENT_APPLICATION`** – Required only when calling `scripts/support/agent.sh` directly. `scripts/shell.sh` sets it to the project root for you.
+2. **`MAVEN_UPDATE_SNAPSHOTS`** – Defaults to `false`. Set to `true` *before* running `scripts/shell.sh`/`support/agent.sh` if you need to force `mvn -U ...` and refresh snapshot dependencies immediately. Leaving it unset dramatically reduces repeated downloads thanks to the `daily` snapshot update policy configured in `pom.xml`.
+3. **Spring profiles** – `GUIDE_PROFILE` in `.env` selects the Spring profile loaded by the helper scripts (see `scripts/README.md`). Use per-developer profiles to customize ingestion sources and runtime config.
+4. **Compose overrides** – `GUIDE_PORT`, `OPENAI_API_KEY`, `NEO4J_*`, and `DISCORD_TOKEN` still apply when using Docker Compose. You can export them or store them in a `.env` next to `compose.yaml` (Docker Compose auto-loads it).
+5. **Chat server vs. Spring Shell** – The chat server is enabled by default. If you need Spring Shell instead, follow the guidance near the top of this README (`pom.xml` has the relevant lines to toggle the modes).
+
+Pick the option that matches your workflow (single-node dev via Maven, containerized via Docker, or shell helper scripts). All approaches end up serving HTTP/WebSocket on `http://localhost:${GUIDE_PORT:-1337}` and SSE on `/sse` once the app is running.

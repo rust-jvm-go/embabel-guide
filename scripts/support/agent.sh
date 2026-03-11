@@ -31,5 +31,10 @@ if [ ! -f "$POM_FILE" ]; then
     exit 1
 fi
 
-# Run Maven Spring Boot application
-$SCRIPT_DIR/../../mvnw -U -f "$POM_FILE" -Dmaven.test.skip=true spring-boot:run
+# Run Maven Spring Boot application (allow caller to opt-in to -U via MAVEN_UPDATE_SNAPSHOTS=true)
+MAVEN_UPDATE_FLAG=""
+if [[ "${MAVEN_UPDATE_SNAPSHOTS:-false}" == "true" ]]; then
+    MAVEN_UPDATE_FLAG="-U"
+fi
+
+$SCRIPT_DIR/../../mvnw ${MAVEN_UPDATE_FLAG} -f "$POM_FILE" -Dmaven.test.skip=true spring-boot:run
