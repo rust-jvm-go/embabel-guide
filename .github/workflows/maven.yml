@@ -3,7 +3,9 @@
 
 name: Build
 
-on:
+on: 
+  repository_dispatch:
+    types: [agent-snapshots-deployed]
   push:
   pull_request:
     types: [ opened, synchronize, reopened ]
@@ -85,3 +87,20 @@ jobs:
         with:
           files: target/site/jacoco/jacoco.xml
           fail_ci_if_error: false
+
+  # Build Failure Notification
+  notify:
+    needs: [build]
+    if: failure() && github.ref == 'refs/heads/main'
+    uses: embabel/embabel-build/.github/workflows/discord-notify.yml@main
+    secrets: inherit
+
+  #Build Recovery ( if prior build failed ) Notification
+  notify-recovery:
+    needs: [build]
+    if: success() && github.ref == 'refs/heads/main'
+    uses: embabel/embabel-build/.github/workflows/notify-recovery.yml@main
+    with:
+      branch: main
+      caller_run_id: ${{ github.run_id }}
+    secrets: inherit
