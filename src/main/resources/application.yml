@@ -15,13 +15,18 @@ guide:
   default-persona: adaptive
 
   chat-llm:
-    model: ${GUIDE_CHAT_LLM_MODEL:${OLLAMA_CHAT_MODEL:kimi-k2.5:cloud}}
+    model: ${GUIDE_CHAT_LLM_MODEL:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
   classifier-llm:
-    model: ${GUIDE_CLASSIFIER_LLM_MODEL:${OLLAMA_CHAT_MODEL:kimi-k2.5:cloud}}
+    model: ${GUIDE_CLASSIFIER_LLM_MODEL:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
   narrator-llm:
-    model: ${GUIDE_NARRATOR_LLM_MODEL:${OLLAMA_CHAT_MODEL:kimi-k2.5:cloud}}
+    model: ${GUIDE_NARRATOR_LLM_MODEL:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
+
+  # Max time allowed for a single MCP tool call before the server returns a timeout result.
+  # This bounds stuck MCP research/tool requests without closing the overall SSE session.
+  # Uses ISO-8601 durations, for example: PT30S (30 seconds), PT2M (2 minutes), PT5M (5 minutes), PT1H (1 hour).
+  mcp-tool-timeout: PT2M
 
   content-chunker:
     include-section-title-in-chunk: false
@@ -75,13 +80,13 @@ embabel:
 
   models:
     llms:
-      summarizer: ${EMBABEL_MODELS_LLMS_SUMMARIZER:${OLLAMA_CHAT_MODEL:kimi-k2.5:cloud}}
+      summarizer: ${EMBABEL_MODELS_LLMS_SUMMARIZER:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
     # Change this if you wish to use a non Open AI default embedding model
     default-embedding-model: ${EMBABEL_MODELS_DEFAULTEMBEDDINGMODEL:${OLLAMA_EMBEDDING_MODEL:qwen3-embedding:0.6b}}
 
     # Change this to use a non Open AI default LLM
-    default-llm: ${EMBABEL_MODELS_DEFAULTLLM:${OLLAMA_CHAT_MODEL:kimi-k2.5:cloud}}
+    default-llm: ${EMBABEL_MODELS_DEFAULTLLM:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
   agent:
 

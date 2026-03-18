@@ -9,6 +9,7 @@ import org.springframework.boot.context.properties.NestedConfigurationProperty
 import org.springframework.boot.context.properties.bind.DefaultValue
 import org.springframework.validation.annotation.Validated
 import java.nio.file.Path
+import java.time.Duration
 
 /**
  * Configuration properties for the Guide application.
@@ -44,6 +45,8 @@ data class GuideProperties(
     val directories: List<String>?,
     val toolGroups: Set<String>,
     val narratorLlm: LlmOptions,
+    @DefaultValue("PT2M")
+    val mcpToolTimeout: Duration,
 ) {
 
     fun toolNamingStrategy(): StringTransformer = StringTransformer { name -> toolPrefix + name }
