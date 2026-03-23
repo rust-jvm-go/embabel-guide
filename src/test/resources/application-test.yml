@@ -36,6 +36,9 @@ spring:
     mcp:
       client:
         enabled: false
+  autoconfigure:
+    exclude:
+      - com.embabel.agent.embeddings.onnx.OnnxEmbeddingAutoConfiguration
 
 embabel:
   agent-platform:
