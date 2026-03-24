@@ -29,6 +29,24 @@
   description: >
     Utility AI example
 
+- fqn: com.embabel.coding.tools.git.GitHubRepository
+  url: https://github.com/embabel/embabel-chat-store.git
+  description: >
+    Embabel chat store implementation
+    Chat session persistence and history management
+
+- fqn: com.embabel.coding.tools.git.GitHubRepository
+  url: https://github.com/liberation-data/drivine4j.git
+  description: >
+    Drivine4j: Graph database connectivity library for the JVM
+    Used by Embabel for Neo4j persistence
+
+- fqn: com.embabel.coding.tools.git.GitHubRepository
+  url: https://github.com/embabel/embabel-agent-rag-neo-drivine.git
+  description: >
+    Embabel RAG Neo4j integration using Drivine
+    RAG vector store implementation backed by Neo4j
+
 - fqn: com.embabel.coding.tools.api.ApiReferenceProvider
   name: embabel-agent
   description: Embabel Agent API - use to check type signatures

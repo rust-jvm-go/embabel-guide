@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.PlatformTransactionManager;
 
@@ -35,10 +36,12 @@ import org.springframework.transaction.PlatformTransactionManager;
  * Creates the DrivineStore and related beans for Neo4j-based RAG operations.
  *
  * The EmbeddingService is provided by the ONNX embeddings auto-configuration
- * (embabel-agent-embeddings-onnx) and injected directly into DrivineStore.
+ * and registered via registerSingleton. @DependsOn ensures the ONNX initializer
+ * runs first so the EmbeddingService bean exists when this configuration is wired.
  */
 @Configuration
 @EnableConfigurationProperties(NeoRagServiceProperties.class)
+@DependsOn("onnxEmbeddingInitializer")
 class RagConfiguration {
 
     @Bean
