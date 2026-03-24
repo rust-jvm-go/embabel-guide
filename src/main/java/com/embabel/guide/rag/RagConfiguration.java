@@ -20,6 +20,7 @@ import com.embabel.agent.rag.ingestion.ContentChunker;
 import com.embabel.agent.rag.neo.drivine.DrivineCypherSearch;
 import com.embabel.agent.rag.neo.drivine.DrivineStore;
 import com.embabel.agent.rag.neo.drivine.NeoRagServiceProperties;
+import com.embabel.common.ai.autoconfig.ProviderInitialization;
 import com.embabel.common.ai.model.EmbeddingService;
 import com.embabel.guide.GuideProperties;
 import org.drivine.manager.PersistenceManager;
@@ -27,9 +28,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.List;
 
 /**
  * Configuration for RAG (Retrieval Augmented Generation) components.
@@ -41,7 +43,6 @@ import org.springframework.transaction.PlatformTransactionManager;
  */
 @Configuration
 @EnableConfigurationProperties(NeoRagServiceProperties.class)
-@DependsOn("onnxEmbeddingInitializer")
 class RagConfiguration {
 
     @Bean
@@ -54,11 +55,12 @@ class RagConfiguration {
     DrivineStore drivineStore(
             @Qualifier("neo") PersistenceManager persistenceManager,
             PlatformTransactionManager platformTransactionManager,
+            List<ProviderInitialization> providerInitializations,
             EmbeddingService embeddingService,
             ChunkTransformer chunkTransformer,
             NeoRagServiceProperties neoRagProperties,
             GuideProperties guideProperties) {
-        var chunkerConfig = guideProperties.getChunkerConfig() != null
+        ContentChunker.Config chunkerConfig = guideProperties.getChunkerConfig() != null
                 ? guideProperties.getChunkerConfig()
                 : new ContentChunker.Config();
         return new DrivineStore(

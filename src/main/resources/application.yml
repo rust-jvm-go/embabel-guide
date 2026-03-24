@@ -124,7 +124,15 @@ embabel:
       models:
         onnx:
           embeddings:
-            cache-dir: ${user.home}/.embabel/models
+            enabled: false
+
+    # To switch back to local ONNX embeddings, set `enabled` above to true and uncomment the
+    # `default-embedding-model: all-MiniLM-L6-v2` line above and this block below.
+    # platform:
+    #   models:
+    #     onnx:
+    #       embeddings:
+    #         cache-dir: ${user.home}/.embabel/models
 
     rag:
       neo:

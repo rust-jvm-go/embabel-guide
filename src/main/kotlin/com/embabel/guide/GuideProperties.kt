@@ -1,6 +1,7 @@
 package com.embabel.guide
 
 import com.embabel.agent.rag.ingestion.ContentChunker
+import com.embabel.common.ai.model.LlmOptions
 import com.embabel.common.util.StringTransformer
 import com.embabel.hub.integrations.LlmProvider
 import jakarta.validation.constraints.NotBlank
