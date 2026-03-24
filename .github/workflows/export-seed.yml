@@ -44,6 +44,19 @@ jobs:
       - name: Build guide (skip tests)
         run: mvn -U -B package -DskipTests
 
+      - name: Pre-cache ONNX embedding model
+        run: |
+          echo "HACK: Pre-downloading ONNX model with curl -L to work around HuggingFace redirects not being followed by OnnxModelLoader. Remove this step once the upstream embabel-agent-starter-onnx handles redirects correctly."
+          MODEL_DIR="$HOME/.embabel/models/all-MiniLM-L6-v2"
+          mkdir -p "$MODEL_DIR"
+          echo "Downloading ONNX model to $MODEL_DIR..."
+          curl -L -o "$MODEL_DIR/model.onnx" \
+            "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx"
+          curl -L -o "$MODEL_DIR/tokenizer.json" \
+            "https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json"
+          echo "model.onnx: $(du -h "$MODEL_DIR/model.onnx" | cut -f1)"
+          echo "tokenizer.json: $(du -h "$MODEL_DIR/tokenizer.json" | cut -f1)"
+
       - name: Start guide with auto-seed
         env:
           OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}

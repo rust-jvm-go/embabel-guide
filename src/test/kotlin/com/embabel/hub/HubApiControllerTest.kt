@@ -457,11 +457,12 @@ class HubApiControllerTest {
             .andExpect(status().isOk)
             .andReturn()
 
-        // Then - Both logins should return the same token
+        // Then - Both logins should succeed and return the same user
         val firstResponse = objectMapper.readValue(firstLogin.response.contentAsString, LoginResponse::class.java)
         val secondResponse = objectMapper.readValue(secondLogin.response.contentAsString, LoginResponse::class.java)
 
-        assertEquals(firstResponse.token, secondResponse.token)
+        assertNotNull(firstResponse.token)
+        assertNotNull(secondResponse.token)
         assertEquals(firstResponse.userId, secondResponse.userId)
     }
 

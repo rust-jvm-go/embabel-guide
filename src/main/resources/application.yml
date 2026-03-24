@@ -14,6 +14,8 @@ guide:
   # You can add your own persona files to that directory
   default-persona: adaptive
 
+  # default-provider: OPENAI  # Auto-detected from env vars (OPENAI_API_KEY, ANTHROPIC_API_KEY, etc.)
+
   chat-llm:
     model: ${GUIDE_CHAT_LLM_MODEL:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
@@ -38,8 +40,30 @@ guide:
   # Ingested via load-references (or on startup if reload-content-on-startup is true)
   urls:
     - https://docs.embabel.com/embabel-agent/guide/0.3.5-SNAPSHOT/
+    # @springrod blog posts
+    - https://medium.com/@springrod/embabel-a-new-agent-platform-for-the-jvm-1c83402e0014
+    - https://medium.com/@springrod/production-ready-gen-ai-beyond-the-python-prototype-439bf213a8c0
+    - https://medium.com/@springrod/building-reliable-agentic-systems-part-i-b056d5b59392
+    - https://medium.com/@springrod/the-embabel-vision-967654f13793
+    - https://medium.com/@springrod/ai-for-your-gen-ai-how-and-why-embabel-plans-3930244218f6
     - https://medium.com/@springrod/build-better-agents-in-java-vs-python-embabel-vs-langgraph-f7951a0d855c
+    - https://medium.com/@springrod/ground-your-ai-transformation-on-what-works-today-bfc525418118
+    - https://medium.com/@springrod/from-alchemy-to-engineering-building-type-safe-gen-ai-applications-with-embabel-c3d89b7c989f
+    - https://medium.com/@springrod/building-a-chatbot-with-embabel-agentic-rag-b26a8346cb16
+    - https://medium.com/@springrod/rethinking-rag-pipelines-are-the-past-agentic-is-the-future-77c887414621
+    - https://medium.com/@springrod/dont-talk-english-to-your-llm-ecbfe954bea1
+    - https://medium.com/@springrod/why-you-should-use-local-models-a3fce1124c94
+    - https://medium.com/@springrod/you-can-build-better-ai-agents-in-java-than-python-868eaf008493
+    - https://medium.com/@springrod/embabel-year-end-update-building-the-best-agent-framework-25ed98728e79
+    - https://medium.com/@springrod/building-stateful-ai-agents-how-to-create-interactive-mcp-tools-with-embabel-0dfbd3037cf7
     - https://medium.com/@springrod/context-engineering-needs-domain-understanding-b4387e8e4bf8
+    - https://medium.com/the-composition/software-that-writes-and-evolves-software-953578a6fc36
+    # Embabel publication
+    - https://medium.com/embabel/agent-memory-is-not-a-greenfield-problem-ground-it-in-your-existing-data-9272cabe1561
+    # @jasper.blues / Embabel publication
+    - https://medium.com/embabel/from-docs-to-dialog-2b613901db60
+    - https://medium.com/embabel/the-very-slowly-ticking-time-bomb-in-your-graph-persistence-stack-6da1a8da9515
+    - https://medium.com/embabel/the-voice-the-word-and-the-wheel-d6e2ef2ab26e
 
   # Local directories to ingest (full tree). Paths are absolute or relative to working directory.
   # Example: clone repos then list them here for full-repo RAG.
@@ -88,8 +112,19 @@ embabel:
     # Change this to use a non Open AI default LLM
     default-llm: ${EMBABEL_MODELS_DEFAULTLLM:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
+    # Local ONNX embedding model (no API key needed)
+    # default-embedding-model: all-MiniLM-L6-v2
+
+    # Fake LLM — real models are resolved per-user via BYOK (UserLlmResolver)
+    # default-llm: setup-required
+
   agent:
 
+    platform:
+      models:
+        onnx:
+          embeddings:
+            cache-dir: ${user.home}/.embabel/models
 
     rag:
       neo:
