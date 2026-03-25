@@ -4,7 +4,16 @@
 
 FROM eclipse-temurin:21-jre-jammy
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 WORKDIR /app
+
+# Pre-download ONNX embedding model (HuggingFace redirects break JDK default HTTP client)
+RUN mkdir -p /root/.embabel/models/all-MiniLM-L6-v2 && \
+    curl -L -o /root/.embabel/models/all-MiniLM-L6-v2/model.onnx \
+      https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx && \
+    curl -L -o /root/.embabel/models/all-MiniLM-L6-v2/tokenizer.json \
+      https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json
 
 COPY guide-app.jar app.jar
 
