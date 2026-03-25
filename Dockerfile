@@ -1,8 +1,8 @@
 # Standalone Guide backend image
+# Uses jammy (not alpine) because ONNX Runtime needs libstdc++
 # Expects guide-app.jar to be pre-built and placed in this directory
-# Used by: Cloud Run deployment (via Terraform) and docker compose
 
-FROM eclipse-temurin:21-jre-alpine
+FROM eclipse-temurin:21-jre-jammy
 
 WORKDIR /app
 
