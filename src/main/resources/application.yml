@@ -144,4 +144,5 @@ database:
       password: ${NEO4J_PASSWORD:brahmsian}
       host: ${NEO4J_HOST:localhost}
       port: 7687
+      protocol: ${NEO4J_PROTOCOL:bolt}
       databaseName: neo4j
