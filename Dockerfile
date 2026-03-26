@@ -1,21 +1,22 @@
-#
-# Multi-stage build so `docker compose up --build` works from a fresh clone.
-#
+# Standalone Guide backend image
+# Uses jammy (not alpine) because ONNX Runtime needs libstdc++
+# Expects guide-app.jar to be pre-built and placed in this directory
 
-FROM maven:3.9.9-eclipse-temurin-21 AS build
-WORKDIR /workspace
+FROM eclipse-temurin:21-jre-jammy
 
-COPY pom.xml ./
-COPY src ./src
-COPY codegen-gradle ./codegen-gradle
-RUN chmod +x /workspace/codegen-gradle/gradlew
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-RUN mvn -q -U -DskipTests package
-
-FROM eclipse-temurin:21-jre-jammy AS runtime
 WORKDIR /app
 
-COPY --from=build /workspace/target/*.jar /app/app.jar
+# Pre-download ONNX embedding model (HuggingFace redirects break JDK default HTTP client)
+RUN mkdir -p /root/.embabel/models/all-MiniLM-L6-v2 && \
+    curl -L -o /root/.embabel/models/all-MiniLM-L6-v2/model.onnx \
+      https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/onnx/model.onnx && \
+    curl -L -o /root/.embabel/models/all-MiniLM-L6-v2/tokenizer.json \
+      https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2/resolve/main/tokenizer.json
+
+COPY guide-app.jar app.jar
 
 EXPOSE 1337
-ENTRYPOINT ["java", "-jar", "/app/app.jar"]
+
+ENTRYPOINT ["java", "-jar", "app.jar"]

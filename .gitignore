@@ -47,6 +47,7 @@ scripts/user-config/application-*.yml
 
 # Runtime artifacts
 *.pid
+guide-app.jar
 
 .metals
 

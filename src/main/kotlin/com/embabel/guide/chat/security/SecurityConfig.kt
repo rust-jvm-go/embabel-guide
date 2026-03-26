@@ -94,7 +94,8 @@ class SecurityConfig(
                     "/api/auth/me",
                     "/api/hub/personas",
                     "/api/hub/sessions",
-                    "/api/v1/data/stats"
+                    "/api/v1/data/stats",
+                    "/api/v1/deepgram/models"
                 ).permitAll()
                 it.anyRequest().authenticated()
             }
