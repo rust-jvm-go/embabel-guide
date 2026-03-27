@@ -1,5 +1,6 @@
 package com.embabel.hub.integrations
 
+import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserService
 import com.embabel.hub.UnauthorizedException
 import com.embabel.hub.WelcomeGreeter
@@ -29,6 +30,7 @@ data class ValidateKeyResponse(
 class IntegrationsController(
     private val userKeyStore: UserKeyStore,
     private val guideUserService: GuideUserService,
+    private val guideUserCache: GuideUserCache,
     private val welcomeGreeter: WelcomeGreeter,
     private val keyEncryptionService: KeyEncryptionService,
     private val userModelFactory: UserModelFactory,
@@ -54,6 +56,7 @@ class IntegrationsController(
         }
 
         userKeyStore.setKey(webUserId, request.provider, request.apiKey)
+        guideUserCache.invalidate(webUserId)
         fireWelcome(webUserId)
 
         val encryptedKey = keyEncryptionService.encrypt(request.apiKey)

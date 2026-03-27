@@ -2,6 +2,7 @@ package com.embabel.hub
 
 import com.embabel.guide.chat.service.ChatSessionService
 import com.embabel.guide.domain.GuideUser
+import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserService
 import com.embabel.guide.domain.WebUserData
 import com.embabel.chat.store.util.UUIDv7
@@ -13,7 +14,8 @@ class HubService(
     private val guideUserService: GuideUserService,
     private val jwtTokenService: JwtTokenService,
     private val welcomeGreeter: WelcomeGreeter,
-    private val chatSessionService: ChatSessionService
+    private val chatSessionService: ChatSessionService,
+    private val guideUserCache: GuideUserCache,
 ) {
 
     private val passwordEncoder = BCryptPasswordEncoder()
@@ -140,6 +142,7 @@ class HubService(
         }
         val user = guideUserService.findByWebUserId(userId).orElseThrow()
         return guideUserService.updatePersona(user.core.id, persona)
+            .also { guideUserCache.invalidate(userId) }
     }
 
     /**
