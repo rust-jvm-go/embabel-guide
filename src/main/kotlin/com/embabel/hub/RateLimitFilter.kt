@@ -5,7 +5,7 @@ import io.github.bucket4j.Bucket
 import jakarta.servlet.FilterChain
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
-import org.springframework.core.Ordered
+import org.springframework.boot.autoconfigure.security.SecurityProperties
 import org.springframework.core.annotation.Order
 import org.springframework.http.HttpStatus
 import org.springframework.stereotype.Component
@@ -19,9 +19,11 @@ import java.util.concurrent.ConcurrentHashMap
  * - Global limit on all other requests
  *
  * Buckets are created lazily per IP and kept in memory.
+ * Runs after the Spring Security filter chain (which handles CORS)
+ * so that 429 responses still carry Access-Control-Allow-Origin headers.
  */
 @Component
-@Order(Ordered.HIGHEST_PRECEDENCE)
+@Order(SecurityProperties.DEFAULT_FILTER_ORDER + 1)
 class RateLimitFilter : OncePerRequestFilter() {
 
     private val globalBuckets = ConcurrentHashMap<String, Bucket>()
