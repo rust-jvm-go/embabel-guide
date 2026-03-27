@@ -70,7 +70,7 @@ class UserModelFactory(
             null
         } catch (e: Exception) {
             val message = e.cause?.message ?: e.message ?: "Unknown error"
-            logger.warn("API key validation failed for {}: {}", provider, message)
+            logger.debug("API key validation failed for {}: {}", provider, message)
             when {
                 message.contains("401") || message.contains("unauthorized", ignoreCase = true) ||
                     message.contains("invalid", ignoreCase = true) && message.contains("key", ignoreCase = true) ->

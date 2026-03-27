@@ -65,7 +65,7 @@ class RateLimitFilter : OncePerRequestFilter() {
             .build()
 
         private fun newTightBucket(): Bucket = Bucket.builder()
-            .addLimit(Bandwidth.simple(10, Duration.ofMinutes(1)))
+            .addLimit(Bandwidth.simple(40, Duration.ofMinutes(1)))
             .build()
     }
 }

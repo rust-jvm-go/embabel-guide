@@ -24,10 +24,10 @@ class RateLimitFilterTest {
     }
 
     @Test
-    fun `tight-path requests are limited at 10 per minute`() {
+    fun `tight-path requests are limited at 40 per minute`() {
         val ip = "10.0.0.2"
 
-        repeat(10) { i ->
+        repeat(40) { i ->
             val req = MockHttpServletRequest("POST", "/api/hub/integrations/keys/validate")
             req.remoteAddr = ip
             val res = MockHttpServletResponse()
@@ -39,7 +39,7 @@ class RateLimitFilterTest {
         req.remoteAddr = ip
         val res = MockHttpServletResponse()
         filter.doFilter(req, res, MockFilterChain())
-        assertEquals(429, res.status, "11th request should be rate-limited")
+        assertEquals(429, res.status, "41st request should be rate-limited")
     }
 
     @Test
