@@ -1,5 +1,6 @@
 package com.embabel.guide.chat.config
 
+import io.micrometer.context.ContextSnapshot
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor
@@ -19,6 +20,7 @@ class AsyncConfig {
         executor.maxPoolSize = 5
         executor.queueCapacity = 100
         executor.setThreadNamePrefix("guide-async-")
+        executor.setTaskDecorator { runnable -> ContextSnapshot.captureAll().wrap(runnable) }
         executor.initialize()
         return executor
     }
