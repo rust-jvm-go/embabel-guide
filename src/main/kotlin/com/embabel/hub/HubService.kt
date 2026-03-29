@@ -2,6 +2,7 @@ package com.embabel.hub
 
 import com.embabel.guide.chat.service.ChatSessionService
 import com.embabel.guide.domain.GuideUser
+import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserService
 import com.embabel.guide.domain.WebUserData
 import com.embabel.chat.store.util.UUIDv7
@@ -13,7 +14,8 @@ class HubService(
     private val guideUserService: GuideUserService,
     private val jwtTokenService: JwtTokenService,
     private val welcomeGreeter: WelcomeGreeter,
-    private val chatSessionService: ChatSessionService
+    private val chatSessionService: ChatSessionService,
+    private val guideUserCache: GuideUserCache,
 ) {
 
     private val passwordEncoder = BCryptPasswordEncoder()
@@ -109,16 +111,8 @@ class HubService(
             throw LoginException("Invalid username or password")
         }
 
-        // Welcome new users on first login
-        if (!guideUser.core.welcomed) {
-            guideUser.core.welcomed = true
-            guideUserService.saveUser(guideUser)
-            welcomeGreeter.greetNewUser(
-                guideUserId = guideUser.core.id,
-                webUserId = webUser.id,
-                displayName = webUser.displayName
-            )
-        }
+        // Welcome is deferred to first BYOK key set (see IntegrationsController.fireWelcome)
+        // so the AI greeting has an LLM available to generate the message.
 
         // Generate a fresh token on login for accurate expiration
         val token = jwtTokenService.generateRefreshToken(webUser.id)
@@ -148,6 +142,7 @@ class HubService(
         }
         val user = guideUserService.findByWebUserId(userId).orElseThrow()
         return guideUserService.updatePersona(user.core.id, persona)
+            .also { guideUserCache.invalidate(userId) }
     }
 
     /**

@@ -10,6 +10,7 @@ import com.embabel.agent.rag.neo.drivine.DrivineStore
 import com.embabel.agent.rag.tools.ToolishRag
 import com.embabel.agent.rag.tools.TryHyDE
 import com.embabel.chat.AssistantMessage
+import com.embabel.chat.Message
 import com.embabel.chat.ChatTrigger
 import com.embabel.chat.Conversation
 import com.embabel.chat.UserMessage
@@ -22,6 +23,7 @@ import com.embabel.guide.command.CommandExecutor
 import com.embabel.guide.command.CommandResult
 import com.embabel.guide.command.CommandTools
 import com.embabel.guide.domain.GuideUser
+import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserRepository
 import com.embabel.guide.util.toDiscordUserInfoData
 import com.embabel.guide.util.toGuideUserData
@@ -45,6 +47,7 @@ import java.util.concurrent.ThreadLocalRandom
 class ChatActions(
     private val dataManager: DataManager,
     private val guideUserRepository: GuideUserRepository,
+    private val guideUserCache: GuideUserCache,
     private val drivineStore: DrivineStore,
     private val guideProperties: GuideProperties,
     private val narrationCache: NarrationCache,
@@ -86,7 +89,7 @@ class ChatActions(
                 lastMsg?.role ?: "none",
                 lastMsg?.content?.truncate(100) ?: "none")
 
-            val templateModel = buildTemplateModel(guideUser, conversation)
+            val templateModel = buildTemplateModel(guideUser, snapshot)
 
             // Pass 1: Classify message category (nano)
             var category = MessageCategory.INFORMATIONAL
@@ -94,7 +97,7 @@ class ChatActions(
             if (snapshot.size > 1) {
                 try {
                     val userContent = (snapshot.last() as? UserMessage)?.content ?: ""
-                    val check = classifyMessage(userContent, conversation, context, guideUser, templateModel)
+                    val check = classifyMessage(userContent, snapshot, context, guideUser, templateModel)
                     category = check.category
                     quickResponse = check.response
                     logger.info("[CLASSIFY RESULT] input='{}' category={}",
@@ -177,7 +180,7 @@ class ChatActions(
         }
         try {
             val assistantMessage = buildRendering(context, guideUser)
-                .respondWithTrigger(conversation, trigger.prompt, buildTemplateModel(guideUser, conversation))
+                .respondWithTrigger(conversation, trigger.prompt, buildTemplateModel(guideUser, conversation.messages))
             computeAndCacheNarration(assistantMessage, conversation, guideUser, context)
             sendResponse(assistantMessage, conversation, context)
         } catch (e: Exception) {
@@ -191,16 +194,29 @@ class ChatActions(
             logger.warn("user is null: Cannot create or fetch GuideUser")
             null
         }
-        is DiscordUser -> guideUserRepository.findByDiscordUserId(user.id)
-            .orElseGet {
-                val created = guideUserRepository.createWithDiscord(
-                    user.toGuideUserData(), user.toDiscordUserInfoData()
-                )
-                logger.info("Created new Discord user: {}", created)
-                created
+        is DiscordUser -> {
+            val cacheKey = "discord:${user.id}"
+            guideUserCache.get(cacheKey) ?: guideUserRepository.findByDiscordUserId(user.id)
+                .orElseGet {
+                    val created = guideUserRepository.createWithDiscord(
+                        user.toGuideUserData(), user.toDiscordUserInfoData()
+                    )
+                    logger.info("Created new Discord user: {}", created)
+                    created
+                }
+                .also { guideUserCache.put(cacheKey, it) }
+        }
+        is GuideUser -> {
+            val webUserId = user.webUser?.id
+            if (webUserId != null) {
+                guideUserCache.get(webUserId) ?: guideUserRepository.findById(user.core.id)
+                    .orElseThrow { RuntimeException("Missing GuideUser with id: ${user.core.id}") }
+                    .also { guideUserCache.put(webUserId, it) }
+            } else {
+                guideUserRepository.findById(user.core.id)
+                    .orElseThrow { RuntimeException("Missing GuideUser with id: ${user.core.id}") }
             }
-        is GuideUser -> guideUserRepository.findById(user.core.id)
-            .orElseThrow { RuntimeException("Missing GuideUser with id: ${user.core.id}") }
+        }
         else -> throw RuntimeException("Unknown user type: $user")
     }
 
@@ -219,7 +235,7 @@ class ChatActions(
             .rendering("guide_system")
     }
 
-    private fun buildTemplateModel(guideUser: GuideUser, conversation: Conversation): MutableMap<String, Any> {
+    private fun buildTemplateModel(guideUser: GuideUser, messages: List<Message>): MutableMap<String, Any> {
         val persona = guideUser.core.persona ?: guideProperties.defaultPersona
         logger.info("[PERSONA] user={} persona={}", guideUser.core.id, persona)
 
@@ -231,7 +247,7 @@ class ChatActions(
         userMap["customPersona"] = guideUser.core.customPrompt
 
         // Greet by name on first message, ~25% of the time after that
-        val isFirstMessage = conversation.messages.size <= 1
+        val isFirstMessage = messages.size <= 1
         userMap["greetByName"] = isFirstMessage || ThreadLocalRandom.current().nextInt(4) == 0
 
         return mutableMapOf(
@@ -323,12 +339,11 @@ class ChatActions(
      */
     private fun classifyMessage(
         userMessage: String,
-        conversation: Conversation,
+        messages: List<Message>,
         context: ActionContext,
         guideUser: GuideUser,
         templateModel: Map<String, Any>,
     ): CategoryCheck {
-        val messages = conversation.messages
         val conversationContext = buildString {
             val start = maxOf(0, messages.size - 6)
             for (i in start until messages.size) {

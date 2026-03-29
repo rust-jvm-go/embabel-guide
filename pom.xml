@@ -47,14 +47,14 @@
         <dependency>
             <groupId>org.drivine</groupId>
             <artifactId>drivine4j-spring-boot-starter</artifactId>
-            <version>0.0.28</version>
+            <version>0.0.29</version>
         </dependency>
 
         <!-- Chat session storage with autoconfiguration -->
         <dependency>
             <groupId>com.embabel.agent</groupId>
             <artifactId>embabel-agent-starter-chat-store</artifactId>
-            <version>0.2.0-SNAPSHOT</version>
+            <version>0.2.1-SNAPSHOT</version>
         </dependency>
 
         <!-- Spring AI client libraries for BYOK — OpenAI (no starter, which requires API key at startup) -->
@@ -167,6 +167,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
+        <!-- Rate Limiting -->
+        <dependency>
+            <groupId>com.bucket4j</groupId>
+            <artifactId>bucket4j_jdk17-core</artifactId>
+            <version>8.14.0</version>
         </dependency>
 
         <!-- Transaction Management -->

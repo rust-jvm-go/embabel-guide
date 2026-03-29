@@ -20,12 +20,11 @@ class PersonaService {
         val description: String
     )
 
-    /**
-     * Lists all available persona templates from the classpath.
-     *
-     * @return List of personas with name and description
-     */
-    fun listPersonas(): List<Persona> {
+    val personas: List<Persona> = loadPersonas()
+
+    fun listPersonas(): List<Persona> = personas
+
+    private fun loadPersonas(): List<Persona> {
         return try {
             val resources: Array<Resource> = resourceResolver.getResources("classpath:prompts/persona/*.jinja")
 
