@@ -18,7 +18,7 @@ Guide exposes resources relating to the Embabel Agent Framework, such
 as documentation, relevant blogs and other content, and up-to-the-minute API information.
 
 <p align="center">
-  <a href="https://www.youtube.com/watch?v=hY6ZFMIJdd4">
+  <a href="https://www.youtube.com/watch?v=hY6ZFMIJdd4" target="_blank">
     <img src="./guide-demo.png" alt="The Voice, The Word, and The Wheel" width="700">
   </a>
 </p>
