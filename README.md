@@ -18,10 +18,10 @@ Guide exposes resources relating to the Embabel Agent Framework, such
 as documentation, relevant blogs and other content, and up-to-the-minute API information.
 
 <p align="center">
-  <img src="guide-demo.png" alt="Guide Demo" width="700">
+  <a href="https://www.youtube.com/watch?v=hY6ZFMIJdd4" target="_blank">
+    <img src="./guide-demo.png" alt="The Voice, The Word, and The Wheel" width="700">
+  </a>
 </p>
-
-[![The Voice, The Word, and The Wheel](https://img.youtube.com/vi/hY6ZFMIJdd4/maxresdefault.jpg)](https://www.youtube.com/watch?v=hY6ZFMIJdd4)
 
 This is exposed in two ways:
 
