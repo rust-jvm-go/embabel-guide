@@ -16,13 +16,17 @@ data class AnonymousGuideUser(
     val core: GuideUserData,
 
     @GraphRelationship(type = "IS_WEB_USER", direction = Direction.OUTGOING)
-    val webUser: AnonymousWebUserData
+    val webUser: AnonymousWebUserData,
+
+    @GraphRelationship(type = "USES_PERSONA", direction = Direction.OUTGOING)
+    val persona: PersonaData,
 ) {
     /**
      * Convert to the unified GuideUser type for consistent API.
      */
     fun toGuideUser(): GuideUser = GuideUser(
         core = core,
-        webUser = webUser
+        webUser = webUser,
+        persona = persona,
     )
 }

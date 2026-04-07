@@ -125,7 +125,7 @@ class HubService(
             username = webUser.userName,
             displayName = webUser.displayName,
             email = webUser.userEmail ?: "",
-            persona = guideUser.core.persona
+            persona = guideUser.persona.id
         )
     }
 

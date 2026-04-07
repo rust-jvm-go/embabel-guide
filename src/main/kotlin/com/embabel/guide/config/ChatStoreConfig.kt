@@ -43,7 +43,7 @@ class ChatStoreConfig {
             // userId is the internal GuideUser ID; key store is keyed by web user ID
             val webUserId = userId?.let { id ->
                 guideUserCache.getByInternalId(id)?.webUser?.id
-                    ?: guideUserService.findById(id).orElse(null)?.webUser?.id
+                    ?: guideUserService.findWebUserById(id).orElse(null)?.webUser?.id
             }
             logger.info("[TITLE] resolved webUserId={}", webUserId)
             val activeKey = webUserId?.let { userKeyStore.getActiveKey(it) }

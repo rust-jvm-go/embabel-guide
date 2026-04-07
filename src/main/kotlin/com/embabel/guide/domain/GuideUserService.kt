@@ -6,11 +6,12 @@ import java.util.UUID
 
 @Service
 class GuideUserService(
-    private val guideUserRepository: GuideUserRepository
+    private val guideUserRepository: GuideUserRepository,
+    private val personaRepository: PersonaRepository,
 ) {
 
     companion object {
-        const val DEFAULT_PERSONA = "adaptive"
+        const val DEFAULT_PERSONA_NAME = "adaptive"
     }
 
     /**
@@ -45,7 +46,7 @@ class GuideUserService(
                     null
                 )
 
-                guideUserRepository.createWithWebUser(guideUser, anonymousWebUser)
+                guideUserRepository.createWithWebUser(guideUser, anonymousWebUser, resolveDefaultPersona())
             }
     }
 
@@ -60,6 +61,13 @@ class GuideUserService(
     }
 
     /**
+     * Lightweight find by ID — skips USES_PERSONA traversal.
+     */
+    fun findWebUserById(id: String): Optional<GuideWebUser> {
+        return guideUserRepository.findWebUserById(id)
+    }
+
+    /**
      * Finds a GuideUser by their WebUser ID.
      *
      * @param webUserId the WebUser's ID
@@ -67,6 +75,17 @@ class GuideUserService(
      */
     fun findByWebUserId(webUserId: String): Optional<GuideUser> {
         return guideUserRepository.findByWebUserId(webUserId)
+    }
+
+    /**
+     * Creates and saves a new GuideUser from a Discord user.
+     *
+     * @param guideUserData the GuideUser core data
+     * @param discordUserInfo the Discord identity info
+     * @return the saved GuideUser
+     */
+    fun saveFromDiscordUser(guideUserData: GuideUserData, discordUserInfo: DiscordUserInfoData): GuideUser {
+        return guideUserRepository.createWithDiscord(guideUserData, discordUserInfo, resolveDefaultPersona())
     }
 
     /**
@@ -79,9 +98,9 @@ class GuideUserService(
         val guideUser = GuideUserData(
             id = UUID.randomUUID().toString(),
             displayName = webUser.displayName,
-            persona = DEFAULT_PERSONA,
         )
-        return guideUserRepository.createWithWebUser(guideUser, webUser)
+        val defaultPersona = resolveDefaultPersona()
+        return guideUserRepository.createWithWebUser(guideUser, webUser, defaultPersona)
     }
 
     /**
@@ -107,14 +126,23 @@ class GuideUserService(
     /**
      * Updates the persona for a user.
      *
-     * @param userId  the user's ID
-     * @param persona the persona name to set
+     * @param userId    the user's ID
+     * @param personaId the persona ID to set
      * @return the updated GuideUser
      */
-    fun updatePersona(userId: String, persona: String): GuideUser {
-        guideUserRepository.updatePersona(userId, persona)
+    fun updatePersona(userId: String, personaId: String): GuideUser {
+        val personaData = personaRepository.findById(personaId)?.persona
+            ?: throw IllegalArgumentException("Persona not found: $personaId")
+        guideUserRepository.updatePersona(userId, personaData)
         return guideUserRepository.findById(userId)
             .orElseThrow { IllegalArgumentException("User not found: $userId") }
+    }
+
+    private fun resolveDefaultPersona(): PersonaData {
+        val view = personaRepository.findByNameAndOwner(DEFAULT_PERSONA_NAME, PersonaRepository.SYSTEM_OWNER_ID)
+            ?: personaRepository.findByOwner(PersonaRepository.SYSTEM_OWNER_ID).firstOrNull()
+            ?: error("No system personas found — has PersonaSeedingService run?")
+        return view.persona
     }
 
     /**

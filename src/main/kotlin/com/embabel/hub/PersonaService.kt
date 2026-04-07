@@ -53,7 +53,7 @@ class PersonaService(
     private fun resolveInternalId(webUserId: String?): String {
         if (webUserId == null) return SYSTEM_OWNER_ID
         guideUserCache.get(webUserId)?.let { return it.core.id }
-        return guideUserRepository.findByWebUserId(webUserId)
+        return guideUserRepository.findWebUserByWebUserId(webUserId)
             .map { it.core.id }
             .orElse(SYSTEM_OWNER_ID)
     }
@@ -71,7 +71,7 @@ class PersonaService(
             throw IllegalArgumentException(result.reason)
         }
         val personaData = (result as PersonaIngestionService.IngestionResult.Success).personaData
-        val ownerData = guideUserRepository.findByWebUserId(userId)
+        val ownerData = guideUserRepository.findWebUserByWebUserId(userId)
             .orElseThrow { NotFoundException("User not found: $userId") }
             .core
         val saved = personaRepository.save(PersonaView(persona = personaData, owner = ownerData))
@@ -92,7 +92,7 @@ class PersonaService(
             name = copyName,
             isSystem = false,
         )
-        val ownerData = guideUserRepository.findByWebUserId(userId)
+        val ownerData = guideUserRepository.findWebUserByWebUserId(userId)
             .orElseThrow { NotFoundException("User not found: $userId") }
             .core
         val saved = personaRepository.save(PersonaView(persona = copy, owner = ownerData))

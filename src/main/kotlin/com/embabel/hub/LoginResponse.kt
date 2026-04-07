@@ -11,7 +11,7 @@ import java.time.Instant
  * @property username The username
  * @property displayName The user's display name
  * @property email The user's email address
- * @property persona The user's selected persona (optional)
+ * @property persona The user's selected persona ID
  */
 data class LoginResponse(
     val token: String,
@@ -20,5 +20,5 @@ data class LoginResponse(
     val username: String,
     val displayName: String,
     val email: String,
-    val persona: String?
+    val persona: String,
 )

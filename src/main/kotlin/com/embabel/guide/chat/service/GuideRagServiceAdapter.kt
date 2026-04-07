@@ -83,7 +83,7 @@ class GuideRagServiceAdapter(
         val messageOutputChannel = createOutputChannel(responseBuilder, onEvent) { isComplete = true }
 
         try {
-            val guideUser = guideUserRepository.findById(fromUserId)
+            val guideUser = guideUserRepository.findWebUserById(fromUserId)
                 .orElseThrow { RuntimeException("No user found with id: $fromUserId") }
 
             // Get or create session context for this thread

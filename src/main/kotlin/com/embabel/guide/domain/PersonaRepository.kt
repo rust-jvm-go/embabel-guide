@@ -17,6 +17,7 @@ interface PersonaRepository {
      */
     fun findForUser(userId: String): List<PersonaView>
 
+    fun findByNameAndOwner(name: String, ownerId: String): PersonaView?
     fun existsByNameAndOwner(name: String, ownerId: String): Boolean
     fun save(persona: PersonaView): PersonaView
     fun delete(personaId: String)

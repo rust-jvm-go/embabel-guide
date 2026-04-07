@@ -44,13 +44,17 @@ class PersonaRepositoryImpl(
     }
 
     @Transactional(readOnly = true)
-    override fun existsByNameAndOwner(name: String, ownerId: String): Boolean =
+    override fun findByNameAndOwner(name: String, ownerId: String): PersonaView? =
         graphObjectManager.loadAll<PersonaView> {
             where {
                 persona.name eq name
                 owner.id eq ownerId
             }
-        }.isNotEmpty()
+        }.firstOrNull()
+
+    @Transactional(readOnly = true)
+    override fun existsByNameAndOwner(name: String, ownerId: String): Boolean =
+        findByNameAndOwner(name, ownerId) != null
 
     @Transactional
     override fun save(persona: PersonaView): PersonaView =

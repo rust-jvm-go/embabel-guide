@@ -20,7 +20,10 @@ data class GuideUser(
     val webUser: WebUserData? = null,
 
     @GraphRelationship(type = "IS_DISCORD_USER", direction = Direction.OUTGOING)
-    val discordUserInfo: DiscordUserInfoData? = null
+    val discordUserInfo: DiscordUserInfoData? = null,
+
+    @GraphRelationship(type = "USES_PERSONA", direction = Direction.OUTGOING)
+    val persona: PersonaData,
 ) : User, HasGuideUserData {
 
     // Helper properties

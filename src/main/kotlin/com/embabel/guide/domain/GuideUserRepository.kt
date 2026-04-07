@@ -39,11 +39,22 @@ interface GuideUserRepository {
     fun findById(id: String): Optional<GuideUser>
 
     /**
+     * Lightweight find by ID — skips USES_PERSONA traversal.
+     */
+    fun findWebUserById(id: String): Optional<GuideWebUser>
+
+    /**
+     * Lightweight find by web user ID — skips USES_PERSONA traversal.
+     */
+    fun findWebUserByWebUserId(webUserId: String): Optional<GuideWebUser>
+
+    /**
      * Create a new GuideUser with Discord info
      */
     fun createWithDiscord(
         guideUserData: GuideUserData,
-        discordUserInfo: DiscordUserInfoData
+        discordUserInfo: DiscordUserInfoData,
+        persona: PersonaData,
     ): GuideUser
 
     /**
@@ -51,7 +62,8 @@ interface GuideUserRepository {
      */
     fun createWithWebUser(
         guideUserData: GuideUserData,
-        webUserData: WebUserData
+        webUserData: WebUserData,
+        persona: PersonaData,
     ): GuideUser
 
     /**
@@ -62,7 +74,7 @@ interface GuideUserRepository {
     /**
      * Update GuideUser persona
      */
-    fun updatePersona(guideUserId: String, persona: String)
+    fun updatePersona(guideUserId: String, persona: PersonaData)
 
     /**
      * Update GuideUser custom prompt
