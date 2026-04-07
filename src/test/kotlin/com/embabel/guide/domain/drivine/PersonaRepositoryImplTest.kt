@@ -3,11 +3,13 @@ package com.embabel.guide.domain.drivine
 import com.embabel.guide.Neo4jPropertiesInitializer
 import com.embabel.guide.domain.*
 import com.embabel.hub.AudioEffect
+import org.drivine.manager.GraphObjectManager
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.ai.mcp.client.common.autoconfigure.McpClientAutoConfiguration
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.beans.factory.annotation.Qualifier
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -28,8 +30,13 @@ class PersonaRepositoryImplTest {
     @Autowired
     private lateinit var guideUserRepository: GuideUserRepositoryDefaultImpl
 
+    @Autowired
+    @Qualifier("neoGraphObjectManager")
+    private lateinit var graphObjectManager: GraphObjectManager
+
     private lateinit var systemOwner: GuideUserData
     private lateinit var testUser: GuideUserData
+    private lateinit var bootstrapPersona: PersonaData
 
     companion object {
         const val SYSTEM_OWNER_ID = PersonaRepository.SYSTEM_OWNER_ID
@@ -37,18 +44,26 @@ class PersonaRepositoryImplTest {
 
     @BeforeEach
     fun setUp() {
+        // Bootstrap persona needed to satisfy GuideUser's non-null persona relationship
+        bootstrapPersona = graphObjectManager.save(PersonaData(
+            id = UUID.randomUUID().toString(),
+            name = "bootstrap",
+            prompt = "bootstrap persona for tests",
+            isSystem = true,
+        ))
+
         // Ensure system owner (bot:jesse) exists
         systemOwner = guideUserRepository.findById(SYSTEM_OWNER_ID)
             .map { it.core }
             .orElseGet {
                 val u = GuideUserData(id = SYSTEM_OWNER_ID, displayName = "Jesse")
-                guideUserRepository.save(GuideUser(core = u))
+                guideUserRepository.save(GuideUser(core = u, persona = bootstrapPersona))
                 u
             }
 
         // Create a test user
         testUser = GuideUserData(id = "test-user-${UUID.randomUUID()}", displayName = "Test User")
-        guideUserRepository.save(GuideUser(core = testUser))
+        guideUserRepository.save(GuideUser(core = testUser, persona = bootstrapPersona))
     }
 
     private fun makePersonaView(

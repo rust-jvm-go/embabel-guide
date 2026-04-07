@@ -10,7 +10,6 @@ fun DiscordUser.toGuideUserData(): GuideUserData = GuideUserData(
     discordUser.displayName,
     discordUser.username,
     null,  // email
-    null,  // persona
     null,  // customPrompt
 )
 

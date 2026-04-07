@@ -72,7 +72,7 @@ class ChatSessionService(
         authorId: String? = null
     ): StoredSession {
         val sessionId = UUIDv7.generateString()
-        val owner = guideUserRepository.findById(ownerId).orElseThrow {
+        val owner = guideUserRepository.findWebUserById(ownerId).orElseThrow {
             IllegalArgumentException("Owner not found: $ownerId")
         }
 
@@ -85,7 +85,7 @@ class ChatSessionService(
 
         // Look up the author if provided
         val messageAuthor = authorId?.let { id ->
-            guideUserRepository.findById(id).orElse(null)?.guideUserData()
+            guideUserRepository.findWebUserById(id).orElse(null)?.guideUserData()
         }
 
         return chatSessionRepository.createSessionWithMessage(
@@ -128,6 +128,7 @@ class ChatSessionService(
         )
 
         // Send trigger — prompt never enters conversation, only the response is stored
+        // Full GuideUser needed here: ChatActions resolves persona from the trigger's onBehalfOf user.
         val trigger = ChatTrigger(
             prompt = WELCOME_PROMPT_TEMPLATE.format(displayName),
             onBehalfOf = listOf(owner),
@@ -199,7 +200,7 @@ class ChatSessionService(
         if (existing.isPresent) {
             SessionResult(existing.get(), created = false)
         } else {
-            val owner = guideUserRepository.findById(ownerId).orElseThrow {
+            val owner = guideUserRepository.findWebUserById(ownerId).orElseThrow {
                 IllegalArgumentException("Owner not found: $ownerId")
             }
 

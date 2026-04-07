@@ -25,6 +25,8 @@ import com.embabel.guide.command.CommandTools
 import com.embabel.guide.domain.GuideUser
 import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserRepository
+import com.embabel.guide.domain.GuideUserService
+import com.embabel.guide.domain.HasGuideUserData
 import com.embabel.guide.util.toDiscordUserInfoData
 import com.embabel.guide.util.toGuideUserData
 import com.embabel.guide.narrator.NarrationCache
@@ -49,6 +51,7 @@ import java.util.concurrent.ThreadLocalRandom
 class ChatActions(
     private val dataManager: DataManager,
     private val guideUserRepository: GuideUserRepository,
+    private val guideUserService: GuideUserService,
     private val guideUserCache: GuideUserCache,
     private val drivineStore: DrivineStore,
     private val guideProperties: GuideProperties,
@@ -200,7 +203,7 @@ class ChatActions(
             val cacheKey = "discord:${user.id}"
             guideUserCache.get(cacheKey) ?: guideUserRepository.findByDiscordUserId(user.id)
                 .orElseGet {
-                    val created = guideUserRepository.createWithDiscord(
+                    val created = guideUserService.saveFromDiscordUser(
                         user.toGuideUserData(), user.toDiscordUserInfoData()
                     )
                     logger.info("Created new Discord user: {}", created)
@@ -218,6 +221,10 @@ class ChatActions(
                 guideUserRepository.findById(user.core.id)
                     .orElseThrow { RuntimeException("Missing GuideUser with id: ${user.core.id}") }
             }
+        }
+        is HasGuideUserData -> {
+            guideUserRepository.findById(user.guideUserData().id)
+                .orElseThrow { RuntimeException("Missing GuideUser with id: ${user.guideUserData().id}") }
         }
         else -> throw RuntimeException("Unknown user type: $user")
     }
@@ -238,7 +245,7 @@ class ChatActions(
     }
 
     private fun buildTemplateModel(guideUser: GuideUser, messages: List<Message>): MutableMap<String, Any> {
-        val persona = guideUser.core.persona ?: guideProperties.defaultPersona
+        val persona = guideUser.persona.id
         logger.info("[PERSONA] user={} persona={}", guideUser.core.id, persona)
 
         val userMap = mutableMapOf<String, Any?>()
@@ -284,7 +291,7 @@ class ChatActions(
             ))
         }
         try {
-            val personaId = guideUser.core.persona ?: guideProperties.defaultPersona
+            val personaId = guideUser.persona.id
             val personaPrompt = guideUser.core.customPrompt
                 ?: personaService.findPrompt(personaId)
             val narration = narratorAgent.narrate(assistantMessage.content, personaPrompt, context, guideUser.id)

@@ -68,14 +68,31 @@ class GuideUserRepositoryDefaultImpl(
         return Optional.ofNullable(graphObjectManager.load<GuideUser>(id))
     }
 
+    @Transactional(readOnly = true)
+    override fun findWebUserById(id: String): Optional<GuideWebUser> {
+        return Optional.ofNullable(graphObjectManager.load<GuideWebUser>(id))
+    }
+
+    @Transactional(readOnly = true)
+    override fun findWebUserByWebUserId(webUserId: String): Optional<GuideWebUser> {
+        val results = graphObjectManager.loadAll<GuideWebUser> {
+            where {
+                webUser.id eq webUserId
+            }
+        }
+        return Optional.ofNullable(results.firstOrNull())
+    }
+
     @Transactional
     override fun createWithDiscord(
         guideUserData: GuideUserData,
-        discordUserInfo: DiscordUserInfoData
+        discordUserInfo: DiscordUserInfoData,
+        persona: PersonaData,
     ): GuideUser {
         val guideUser = GuideUser(
             core = guideUserData,
-            discordUserInfo = discordUserInfo
+            discordUserInfo = discordUserInfo,
+            persona = persona,
         )
         return graphObjectManager.save(guideUser)
     }
@@ -83,11 +100,13 @@ class GuideUserRepositoryDefaultImpl(
     @Transactional
     override fun createWithWebUser(
         guideUserData: GuideUserData,
-        webUserData: WebUserData
+        webUserData: WebUserData,
+        persona: PersonaData,
     ): GuideUser {
         val guideUser = GuideUser(
             core = guideUserData,
-            webUser = webUserData
+            webUser = webUserData,
+            persona = persona,
         )
         return graphObjectManager.save(guideUser)
     }
@@ -98,11 +117,11 @@ class GuideUserRepositoryDefaultImpl(
     }
 
     @Transactional
-    override fun updatePersona(guideUserId: String, persona: String) {
+    override fun updatePersona(guideUserId: String, persona: PersonaData) {
         val guideUser = findById(guideUserId).orElseThrow {
             IllegalArgumentException("GuideUser not found: $guideUserId")
         }
-        val updated = guideUser.copy(core = guideUser.core.copy(persona = persona))
+        val updated = guideUser.copy(persona = persona)
         graphObjectManager.save(updated)
     }
 

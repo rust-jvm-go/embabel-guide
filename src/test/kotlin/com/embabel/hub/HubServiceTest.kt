@@ -2,6 +2,7 @@ package com.embabel.hub
 
 import com.embabel.guide.Neo4jPropertiesInitializer
 import com.embabel.guide.domain.GuideUserRepository
+import com.embabel.guide.domain.PersonaRepository
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
@@ -27,6 +28,9 @@ class HubServiceTest {
 
     @Autowired
     lateinit var guideUserRepository: GuideUserRepository
+
+    @Autowired
+    lateinit var personaRepository: PersonaRepository
 
     private val passwordEncoder = BCryptPasswordEncoder()
 
@@ -179,17 +183,18 @@ class HubServiceTest {
 
         // Verify initial persona is the default
         val before = guideUserRepository.findByWebUserId(webUserId).orElseThrow()
-        assertEquals("adaptive", before.core.persona)
+        assertEquals("adaptive", before.persona.name)
 
-        // When: Update persona via the same path the frontend uses
-        val updatedUser = service.updatePersona(webUserId, "expert")
+        // When: Update persona via the same path the frontend uses (by persona ID)
+        val jessePersona = personaRepository.findByNameAndOwner("jesse", PersonaRepository.SYSTEM_OWNER_ID)!!
+        val updatedUser = service.updatePersona(webUserId, jessePersona.persona.id)
 
         // Then: The returned user has the new persona
-        assertEquals("expert", updatedUser.core.persona)
+        assertEquals("jesse", updatedUser.persona.name)
 
         // And: Re-reading from the DB also shows the new persona
         val reloaded = guideUserRepository.findByWebUserId(webUserId).orElseThrow()
-        assertEquals("expert", reloaded.core.persona,
+        assertEquals("jesse", reloaded.persona.name,
             "Persona should be persisted in Neo4j and visible on re-read")
     }
 
@@ -207,13 +212,15 @@ class HubServiceTest {
         val registeredUser = service.registerUser(request)
         val webUserId = registeredUser.webUser!!.id
 
-        // When: Update persona twice
-        service.updatePersona(webUserId, "expert")
-        service.updatePersona(webUserId, "adaptive")
+        // When: Update persona twice (by persona ID)
+        val jessePersona = personaRepository.findByNameAndOwner("jesse", PersonaRepository.SYSTEM_OWNER_ID)!!
+        val adaptivePersona = personaRepository.findByNameAndOwner("adaptive", PersonaRepository.SYSTEM_OWNER_ID)!!
+        service.updatePersona(webUserId, jessePersona.persona.id)
+        service.updatePersona(webUserId, adaptivePersona.persona.id)
 
         // Then: The final value sticks
         val reloaded = guideUserRepository.findByWebUserId(webUserId).orElseThrow()
-        assertEquals("adaptive", reloaded.core.persona)
+        assertEquals("adaptive", reloaded.persona.name)
     }
 
 }

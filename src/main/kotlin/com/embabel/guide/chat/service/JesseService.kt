@@ -46,7 +46,7 @@ class JesseService(
         logger.info("Initializing Jesse bot")
 
         // Get or create Jesse as a GuideUser (SessionUser) for message authorship
-        jesseUser = guideUserRepository.findById(JESSE_USER_ID)
+        jesseUser = guideUserRepository.findWebUserById(JESSE_USER_ID)
             .map { it.core }
             .orElseGet {
                 logger.info("Creating Jesse user in database")

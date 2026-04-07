@@ -7,6 +7,7 @@ import com.embabel.guide.domain.GuideUser
 import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserData
 import com.embabel.guide.domain.GuideUserService
+import com.embabel.guide.domain.GuideWebUser
 import com.embabel.guide.domain.WebUserData
 import com.embabel.hub.integrations.LlmProvider
 import com.embabel.hub.integrations.UserKeyStore
@@ -155,19 +156,19 @@ class ChatStoreConfigTitleGeneratorTest {
     @Test
     fun `falls back to GuideUserService when not in cache`() {
         // Don't seed cache — force DB fallback
-        val guideUser = mock(GuideUser::class.java)
+        val guideUser = mock(GuideWebUser::class.java)
         val core = GuideUserData(id = internalId)
         val webUser = mock(WebUserData::class.java)
         `when`(webUser.id).thenReturn(webUserId)
         `when`(guideUser.core).thenReturn(core)
         `when`(guideUser.webUser).thenReturn(webUser)
-        `when`(guideUserService.findById(internalId)).thenReturn(Optional.of(guideUser))
+        `when`(guideUserService.findWebUserById(internalId)).thenReturn(Optional.of(guideUser))
         `when`(userKeyStore.getActiveKey(webUserId)).thenReturn(null)
 
         val result = runBlocking {
             titleGenerator.generate(listOf(userMessage("Hello")), currentTitle = null, userId = internalId)
         }
         assertEquals(TitleGenerator.DEFAULT_FALLBACK, result)
-        verify(guideUserService).findById(internalId)
+        verify(guideUserService).findWebUserById(internalId)
     }
 }

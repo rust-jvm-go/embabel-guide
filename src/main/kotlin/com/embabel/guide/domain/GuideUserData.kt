@@ -17,7 +17,6 @@ data class GuideUserData(
     override var displayName: String = "",
     override var username: String = displayName,
     override var email: String? = null,
-    var persona: String? = null,
     var customPrompt: String? = null,
     var welcomed: Boolean = false,
 ) : HasGuideUserData, StoredUser {

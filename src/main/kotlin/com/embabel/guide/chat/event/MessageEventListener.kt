@@ -47,7 +47,7 @@ class MessageEventListener(
         }
 
         // Look up the GuideUser to get their webUserId for WebSocket routing
-        val guideUser = guideUserRepository.findById(toGuideUserId).orElse(null)
+        val guideUser = guideUserRepository.findWebUserById(toGuideUserId).orElse(null)
         if (guideUser == null) {
             logger.warn("GuideUser not found for id {}, skipping WebSocket delivery", toGuideUserId)
             return
@@ -100,7 +100,7 @@ class MessageEventListener(
         // If the PERSISTED event has a title (e.g. LLM just generated one),
         // push a session event so the frontend dropdown updates immediately.
         if (event.title != null && event.toUserId != null) {
-            val guideUser = guideUserRepository.findById(event.toUserId!!).orElse(null)
+            val guideUser = guideUserRepository.findWebUserById(event.toUserId!!).orElse(null)
             val webUserId = guideUser?.webUser?.id
             if (webUserId != null) {
                 chatService.sendSessionToUser(webUserId, SessionEvent(

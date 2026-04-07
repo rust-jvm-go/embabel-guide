@@ -41,8 +41,8 @@ class GuideUserServiceTest {
 
     @Test
     fun `test getOrCreateAnonymousWebUser creates new user when none exists`() {
-        // Given: No anonymous web user exists
-        guideUserRepository.deleteAll()
+        // Given: fresh transaction — no anonymous web user exists yet
+        // (system personas are seeded at startup by PersonaSeedingService)
 
         // When: We request the anonymous web user
         val anonymousUser = guideUserService.findOrCreateAnonymousWebUser()
@@ -59,7 +59,6 @@ class GuideUserServiceTest {
     @Test
     fun `test getOrCreateAnonymousWebUser returns existing user when one exists`() {
         // Given: An anonymous web user already exists
-        guideUserRepository.deleteAll()
         val firstCall = guideUserService.findOrCreateAnonymousWebUser()
         val firstUserId = firstCall.guideUserData().id
 
@@ -68,17 +67,10 @@ class GuideUserServiceTest {
 
         // Then: The same user is returned
         assertEquals(firstUserId, secondCall.guideUserData().id)
-
-        // Verify only one GuideUser exists in the database
-        val allUsers = guideUserRepository.findAll()
-        assertEquals(1, allUsers.size)
     }
 
     @Test
     fun `test anonymous web user has correct display name`() {
-        // Given: We create an anonymous web user
-        guideUserRepository.deleteAll()
-
         // When: We request the anonymous web user
         val anonymousUser = guideUserService.findOrCreateAnonymousWebUser()
 
