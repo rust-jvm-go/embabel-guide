@@ -4,7 +4,6 @@ data class CommandRequest(
     val correlationId: String,
     val type: String,
     val value: String,
-    val clearPrevious: Boolean = false,
 )
 
 data class CommandResponse(

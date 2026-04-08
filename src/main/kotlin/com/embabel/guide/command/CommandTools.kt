@@ -26,21 +26,6 @@ class CommandTools(
         val match = personas.find { it.name.equals(name, ignoreCase = true) }
             ?: return "Unknown persona '$name'. Available personas: ${personas.joinToString { it.name }}"
 
-        return commandExecutor.executePersonaChange(match.name, webUserId)
-    }
-
-    @Tool(description = "Change the user's text-to-speech voice. Use this when the user wants a different voice for narration.")
-    fun changeVoice(
-        @ToolParam(description = "Name of the voice to use") voice: String,
-    ): String {
-        return commandExecutor.executeVoiceChange(voice, webUserId)
-    }
-
-    @Tool(description = "Apply audio effects to the user's narration. Use this when the user wants to add or change audio effects like echo, reverb, etc.")
-    fun applyEffects(
-        @ToolParam(description = "Comma-separated list of effects to apply") effects: String,
-        @ToolParam(description = "Whether to clear all previous effects before applying new ones") clearPrevious: Boolean,
-    ): String {
-        return commandExecutor.executeEffects(effects, clearPrevious, webUserId)
+        return commandExecutor.executePersonaChange(match.id, webUserId)
     }
 }
