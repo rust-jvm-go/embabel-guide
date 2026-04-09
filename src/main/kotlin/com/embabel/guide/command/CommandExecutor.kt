@@ -13,7 +13,7 @@ import java.util.concurrent.TimeoutException
 
 /**
  * Handles frontend websocket round-trips for commands that need the browser to execute
- * (voice changes, audio effects, etc.).
+ * (e.g. persona changes).
  */
 @Service
 class CommandExecutor(
@@ -24,31 +24,12 @@ class CommandExecutor(
 
     private val pendingCommands = ConcurrentHashMap<String, CompletableFuture<CommandResponse>>()
 
-    fun executePersonaChange(persona: String, webUserId: String?): String {
+    fun executePersonaChange(personaId: String, webUserId: String?): String {
         if (webUserId == null) return "Persona change is only available for web users."
         return sendAndWait(webUserId, CommandRequest(
             correlationId = UUID.randomUUID().toString(),
             type = "change_persona",
-            value = persona,
-        ))
-    }
-
-    fun executeVoiceChange(voice: String, webUserId: String?): String {
-        if (webUserId == null) return "Voice change is only available for web users."
-        return sendAndWait(webUserId, CommandRequest(
-            correlationId = UUID.randomUUID().toString(),
-            type = "change_voice",
-            value = voice,
-        ))
-    }
-
-    fun executeEffects(effects: String, clearPrevious: Boolean, webUserId: String?): String {
-        if (webUserId == null) return "Audio effects are only available for web users."
-        return sendAndWait(webUserId, CommandRequest(
-            correlationId = UUID.randomUUID().toString(),
-            type = "apply_effects",
-            value = effects,
-            clearPrevious = clearPrevious,
+            value = personaId,
         ))
     }
 

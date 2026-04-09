@@ -101,6 +101,16 @@ jobs:
           fi
         timeout-minutes: 25
 
+      - name: Remove Persona nodes before export
+        run: |
+          echo "Removing Persona nodes from export (managed by the app, not the seed)..."
+          RESULT=$(curl -sf \
+            -u "neo4j:testpassword" \
+            -H "Content-Type: application/json" \
+            "http://localhost:7474/db/neo4j/tx/commit" \
+            -d '{"statements": [{"statement": "MATCH (p:Persona) DETACH DELETE p RETURN count(p) AS removed"}]}')
+          echo "$RESULT" | python3 -c "import sys,json; d=json.load(sys.stdin); print(f'Removed {d[\"results\"][0][\"data\"][0][\"row\"][0]} Persona nodes')"
+
       - name: Tag all nodes with managedBy
         run: |
           echo "Tagging all nodes with managedBy=embabel..."
