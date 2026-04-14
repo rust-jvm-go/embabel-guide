@@ -37,7 +37,7 @@ public class DataManager {
     private final List<LlmReference> references;
     private final ChunkingContentElementRepository store;
 
-    private final HierarchicalContentReader hierarchicalContentReader = new TikaHierarchicalContentReader();
+    private final HierarchicalContentReader hierarchicalContentReader;
 
     // Refresh only snapshots
     private final ContentRefreshPolicy contentRefreshPolicy = UrlSpecificContentRefreshPolicy.containingAny(
@@ -46,10 +46,12 @@ public class DataManager {
 
     public DataManager(
             ChunkingContentElementRepository store,
-            GuideProperties guideProperties
+            GuideProperties guideProperties,
+            HierarchicalContentReader hierarchicalContentReader
     ) {
         this.store = store;
         this.guideProperties = guideProperties;
+        this.hierarchicalContentReader = hierarchicalContentReader;
         this.references = LlmReferenceProviders.fromYmlFile(guideProperties.getReferencesFile());
         store.provision();
         // Ingestion on startup is now handled by IngestionRunner (ApplicationRunner)
@@ -96,7 +98,7 @@ public class DataManager {
      */
     public DirectoryParsingResult ingestDirectory(String dir, List<IngestionFailure> failedDocuments) {
         var ft = FileTools.readOnly(dir);
-        var directoryParsingResult = new TikaHierarchicalContentReader()
+        var directoryParsingResult = hierarchicalContentReader
                 .parseFromDirectory(ft, new DirectoryParsingConfig());
         for (var root : directoryParsingResult.getContentRoots()) {
             String docTitle = "unknown";

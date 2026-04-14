@@ -1,6 +1,7 @@
 package com.embabel.guide
 
 import com.embabel.agent.rag.ingestion.ContentChunker
+import com.embabel.agent.rag.ingestion.FetchRoute
 import com.embabel.common.util.StringTransformer
 import com.embabel.hub.integrations.LlmProvider
 import jakarta.validation.constraints.NotBlank
@@ -11,6 +12,29 @@ import org.springframework.validation.annotation.Validated
 import java.nio.file.Path
 
 /**
+ * Versioned content source configuration.
+ * URLs are built from baseUrl + version + "/".
+ */
+data class VersionedContentConfig(
+    val baseUrl: String,
+    val versions: List<String> = emptyList(),
+) {
+    fun urls(): List<String> = versions.map { version -> "${baseUrl}$version/" }
+}
+
+/**
+ * Content source configuration, separating versioned docs from supplementary material.
+ */
+data class ContentConfig(
+    @NestedConfigurationProperty val versioned: VersionedContentConfig,
+    val supplementary: List<String> = emptyList(),
+) {
+    fun allUrls(): List<String> = versioned.urls() + supplementary
+
+    val activeVersion: String? get() = versioned.versions.firstOrNull()
+}
+
+/**
  * Configuration properties for the Guide application.
  *
  * @param reloadContentOnStartup whether to reload RAG content on startup
@@ -19,7 +43,7 @@ import java.nio.file.Path
  * @param projectsPath           path to projects root: absolute, or relative to the process working directory (user.dir)
  * @param chunkerConfig          chunker configuration for RAG ingestion
  * @param referencesFile         YML files containing LLM references such as GitHub repositories and classpath info
- * @param urls                   list of URLs to ingest--for example, documentation and blogs
+ * @param content                content source configuration (versioned docs + supplementary)
  * @param directories            optional list of local directory paths to ingest (full tree); resolved like projectsPath
  * @param toolGroups             toolGroups, such as "web", that are allowed
  */
@@ -36,12 +60,16 @@ data class GuideProperties(
     @DefaultValue("references.yml")
     @field:NotBlank(message = "referencesFile must not be blank")
     val referencesFile: String,
-    val urls: List<String>,
+    @NestedConfigurationProperty val content: ContentConfig,
     @DefaultValue("")
     val toolPrefix: String,
     val directories: List<String>?,
     val toolGroups: Set<String>,
+    val fetchRoutes: List<FetchRoute> = emptyList(),
 ) {
+
+    /** All URLs to ingest (versioned + supplementary). */
+    val urls: List<String> get() = content.allUrls()
 
     fun toolNamingStrategy(): StringTransformer = StringTransformer { name -> toolPrefix + name }
 

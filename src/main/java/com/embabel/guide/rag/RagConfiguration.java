@@ -17,6 +17,16 @@ package com.embabel.guide.rag;
 
 import com.embabel.agent.rag.ingestion.ChunkTransformer;
 import com.embabel.agent.rag.ingestion.ContentChunker;
+import com.embabel.agent.rag.ingestion.ContentFetcher;
+import com.embabel.agent.rag.ingestion.FetchRoute;
+import com.embabel.agent.rag.ingestion.HierarchicalContentReader;
+import com.embabel.agent.rag.ingestion.HttpContentFetcher;
+import com.embabel.agent.rag.ingestion.RoutingContentFetcher;
+import com.embabel.agent.rag.ingestion.RssContentFetcher;
+import com.embabel.agent.rag.ingestion.TikaHierarchicalContentReader;
+import kotlin.Pair;
+
+import java.util.ArrayList;
 import com.embabel.agent.rag.neo.drivine.DrivineCypherSearch;
 import com.embabel.agent.rag.neo.drivine.DrivineStore;
 import com.embabel.agent.rag.neo.drivine.NeoRagServiceProperties;
@@ -45,8 +55,27 @@ import org.springframework.transaction.PlatformTransactionManager;
 class RagConfiguration {
 
     @Bean
-    ChunkTransformer chunkTransformer() {
-        return ChunkTransformer.NO_OP;
+    ChunkTransformer chunkTransformer(GuideProperties guideProperties) {
+        return new VersionChunkTransformer(guideProperties);
+    }
+
+    @Bean
+    HierarchicalContentReader hierarchicalContentReader(GuideProperties guideProperties) {
+        // Medium's RSS feed only exposes ~10 most recent articles per author.
+        // Try RSS first; on failure fall back to direct HTTP in case Medium
+        // is currently lax (its bot-blocking tightens and relaxes over time).
+        var http = new HttpContentFetcher();
+        var mediumRss = new RssContentFetcher(
+                RssContentFetcher.Companion.templateResolver("https://medium.com/feed/{0}"),
+                http);
+        var mediumFetcher = new FallbackContentFetcher(mediumRss, http);
+
+        var routes = new ArrayList<Pair<String, ContentFetcher>>();
+        routes.add(new Pair<>("https://medium.com/**", mediumFetcher));
+        for (FetchRoute route : guideProperties.getFetchRoutes()) {
+            routes.add(new Pair<>(route.getPattern(), route.buildFetcher()));
+        }
+        return new TikaHierarchicalContentReader(new RoutingContentFetcher(http, routes));
     }
 
     @Bean
