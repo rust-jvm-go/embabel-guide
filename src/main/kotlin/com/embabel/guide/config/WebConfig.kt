@@ -26,7 +26,7 @@ class WebConfig(
     )
 
     private val allOrigins: List<String>
-        get() = defaultOrigins + extraOrigins.split(",").map { it.trim() }.filter { it.isNotEmpty() }
+        get() = defaultOrigins + extraOrigins.split(Regex("[,;]")).map { it.trim() }.filter { it.isNotEmpty() }
 
     override fun addCorsMappings(registry: CorsRegistry) {
         // MCP endpoints - allow all origins for CLI tools like Claude Code
