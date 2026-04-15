@@ -40,7 +40,6 @@ dependencies {
 
     // Dependencies needed for domain classes to compile
     implementation("com.embabel.agent:embabel-agent-api:0.3.2-SNAPSHOT")
-    implementation("com.embabel.agent:embabel-agent-discord:0.3.2-SNAPSHOT")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.2")
 }
 

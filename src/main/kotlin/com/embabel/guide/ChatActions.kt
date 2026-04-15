@@ -5,7 +5,6 @@ import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.ActionContext
 import com.embabel.agent.api.common.PromptRunner
 import com.embabel.agent.api.identity.User
-import com.embabel.agent.discord.DiscordUser
 import com.embabel.agent.rag.neo.drivine.DrivineStore
 import com.embabel.agent.filter.PropertyFilter
 import com.embabel.agent.rag.tools.ToolishRag
@@ -29,8 +28,6 @@ import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserRepository
 import com.embabel.guide.domain.GuideUserService
 import com.embabel.guide.domain.HasGuideUserData
-import com.embabel.guide.util.toDiscordUserInfoData
-import com.embabel.guide.util.toGuideUserData
 import com.embabel.guide.narrator.NarrationCache
 import com.embabel.guide.narrator.NarratorAgent
 import com.embabel.guide.rag.DataManager
@@ -200,18 +197,6 @@ class ChatActions(
         null -> {
             logger.warn("user is null: Cannot create or fetch GuideUser")
             null
-        }
-        is DiscordUser -> {
-            val cacheKey = "discord:${user.id}"
-            guideUserCache.get(cacheKey) ?: guideUserRepository.findByDiscordUserId(user.id)
-                .orElseGet {
-                    val created = guideUserService.saveFromDiscordUser(
-                        user.toGuideUserData(), user.toDiscordUserInfoData()
-                    )
-                    logger.info("Created new Discord user: {}", created)
-                    created
-                }
-                .also { guideUserCache.put(cacheKey, it) }
         }
         is GuideUser -> {
             val webUserId = user.webUser?.id

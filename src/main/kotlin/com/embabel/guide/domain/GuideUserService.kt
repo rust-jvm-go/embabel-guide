@@ -78,17 +78,6 @@ class GuideUserService(
     }
 
     /**
-     * Creates and saves a new GuideUser from a Discord user.
-     *
-     * @param guideUserData the GuideUser core data
-     * @param discordUserInfo the Discord identity info
-     * @return the saved GuideUser
-     */
-    fun saveFromDiscordUser(guideUserData: GuideUserData, discordUserInfo: DiscordUserInfoData): GuideUser {
-        return guideUserRepository.createWithDiscord(guideUserData, discordUserInfo, resolveDefaultPersona())
-    }
-
-    /**
      * Creates and saves a new GuideUser from a WebUser.
      *
      * @param webUser the WebUser to create a GuideUser from

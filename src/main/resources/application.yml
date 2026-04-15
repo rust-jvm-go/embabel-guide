@@ -151,9 +151,6 @@ embabel:
       personality: starwars
 
 
-  discord:
-    token: ${DISCORD_TOKEN}
-
   shell:
     line-length: 140
 

@@ -61,41 +61,6 @@ class GuideUserRepositoryDefaultImplTest {
     }
 
     @Test
-    fun `test create and find GuideUser with Discord info`() {
-        // Given: We create GuideUser data with Discord info
-        val persona = createPersona("adaptive")
-        val guideUserData = GuideUserData(
-            id = UUID.randomUUID().toString(),
-            displayName = "Test User",
-        )
-
-        val discordInfo = DiscordUserInfoData(
-            "graphobj-discord-${UUID.randomUUID()}",
-            "testuser",
-            "1234",
-            "Test User",
-            false,
-            "https://example.com/avatar.png"
-        )
-
-        // When: We create the user via the repository
-        val created = repository.createWithDiscord(guideUserData, discordInfo, persona)
-
-        // Then: The user is created with composed data
-        assertNotNull(created)
-        assertEquals(guideUserData.id, created.guideUserData().id)
-        assertEquals("adaptive", created.persona.name)
-        assertEquals(discordInfo.id, created.discordUserInfo?.id)
-        assertEquals("testuser", created.discordUserInfo?.username)
-
-        // And: We can find it by Discord user ID
-        val found = repository.findByDiscordUserId(discordInfo.id!!)
-        assertTrue(found.isPresent)
-        assertEquals(guideUserData.id, found.get().guideUserData().id)
-        assertEquals("testuser", found.get().discordUserInfo?.username)
-    }
-
-    @Test
     fun `test create and find GuideUser with WebUser info`() {
         // Given: We create GuideUser data with WebUser info
         val persona = createPersona("adaptive")
@@ -158,37 +123,6 @@ class GuideUserRepositoryDefaultImplTest {
         assertTrue(found.isPresent)
         assertEquals(guideUserData.id, found.get().guideUserData().id)
         assertEquals(webUserData.userName, found.get().webUser?.userName)
-    }
-
-    @Test
-    fun `test update persona`() {
-        // Given: We create a GuideUser with one persona
-        val adaptive = createPersona("adaptive")
-        val expert = createPersona("expert")
-        val guideUserData = GuideUserData(
-            id = UUID.randomUUID().toString(),
-            displayName = "Persona Test",
-        )
-
-        val discordInfo = DiscordUserInfoData(
-            "graphobj-discord-${UUID.randomUUID()}",
-            "personatest",
-            "0001",
-            "Persona Test",
-            false,
-            null
-        )
-
-        val created = repository.createWithDiscord(guideUserData, discordInfo, adaptive)
-        val userId = created.guideUserData().id
-
-        // When: We update the persona
-        repository.updatePersona(userId, expert)
-
-        // Then: The persona is updated
-        val found = repository.findByDiscordUserId(discordInfo.id!!)
-        assertTrue(found.isPresent)
-        assertEquals("expert", found.get().persona.name)
     }
 
     @Test
@@ -259,15 +193,6 @@ class GuideUserRepositoryDefaultImplTest {
     }
 
     @Test
-    fun `test findByDiscordUserId returns empty when not found`() {
-        // When: We search for a non-existent Discord user
-        val found = repository.findByDiscordUserId("nonexistent")
-
-        // Then: An empty Optional is returned
-        assertFalse(found.isPresent)
-    }
-
-    @Test
     fun `test findByWebUserId returns empty when not found`() {
         // When: We search for a non-existent web user
         val found = repository.findByWebUserId("nonexistent")
@@ -278,28 +203,24 @@ class GuideUserRepositoryDefaultImplTest {
 
     @Test
     fun `test findById returns GuideUser`() {
-        // Given: We create a GuideUser
         val jesse = createPersona("jesse")
         val guideUserData = GuideUserData(
             id = UUID.randomUUID().toString(),
             displayName = "FindById Test",
         )
-
-        val discordInfo = DiscordUserInfoData(
-            "graphobj-discord-${UUID.randomUUID()}",
-            "findbyidtest",
-            "0001",
+        val webUserData = WebUserData(
+            "graphobj-web-${UUID.randomUUID()}",
             "FindById Test",
-            false,
+            "findbyidtest",
+            "findbyid@example.com",
+            "hash",
             null
         )
 
-        repository.createWithDiscord(guideUserData, discordInfo, jesse)
+        repository.createWithWebUser(guideUserData, webUserData, jesse)
 
-        // When: We find by GuideUser ID
         val found = repository.findById(guideUserData.id)
 
-        // Then: The user is found
         assertTrue(found.isPresent)
         assertEquals(guideUserData.id, found.get().guideUserData().id)
         assertEquals("jesse", found.get().persona.name)
@@ -307,24 +228,22 @@ class GuideUserRepositoryDefaultImplTest {
 
     @Test
     fun `test save updates GuideUser`() {
-        // Given: We create a GuideUser
         val original = createPersona("original")
         val modified = createPersona("modified")
         val guideUserData = GuideUserData(
             id = UUID.randomUUID().toString(),
             displayName = "Save Test",
         )
-
-        val discordInfo = DiscordUserInfoData(
-            "graphobj-discord-${UUID.randomUUID()}",
-            "savetest",
-            "0001",
+        val webUserData = WebUserData(
+            "graphobj-web-${UUID.randomUUID()}",
             "Save Test",
-            false,
+            "savetest",
+            "save@example.com",
+            "hash",
             null
         )
 
-        val created = repository.createWithDiscord(guideUserData, discordInfo, original)
+        val created = repository.createWithWebUser(guideUserData, webUserData, original)
 
         // When: We modify and save
         val updated = created.copy(
@@ -347,9 +266,9 @@ class GuideUserRepositoryDefaultImplTest {
     fun `test findAll returns all GuideUsers`() {
         // Given: We create multiple GuideUsers
         val persona = createPersona("adaptive")
-        val user1 = repository.createWithDiscord(
+        val user1 = repository.createWithWebUser(
             GuideUserData(id = UUID.randomUUID().toString(), displayName = "User 1"),
-            DiscordUserInfoData("graphobj-discord-${UUID.randomUUID()}", "user1", "0001", "User 1", false, null),
+            WebUserData("graphobj-web-${UUID.randomUUID()}", "User 1", "user1", "user1a@test.com", "hash", null),
             persona,
         )
         val user2 = repository.createWithWebUser(
@@ -369,18 +288,17 @@ class GuideUserRepositoryDefaultImplTest {
 
     @Test
     fun `test deleteAll removes all GuideUsers`() {
-        // Given: We create a GuideUser
         val persona = createPersona("adaptive")
         val guideUserData = GuideUserData(id = UUID.randomUUID().toString(), displayName = "Delete Test")
-        val discordInfo = DiscordUserInfoData(
-            "graphobj-discord-${UUID.randomUUID()}",
-            "deletetest",
-            "0001",
+        val webUserData = WebUserData(
+            "graphobj-web-${UUID.randomUUID()}",
             "Delete Test",
-            false,
+            "deletetest",
+            "delete@example.com",
+            "hash",
             null
         )
-        repository.createWithDiscord(guideUserData, discordInfo, persona)
+        repository.createWithWebUser(guideUserData, webUserData, persona)
 
         // When: We delete all
         repository.deleteAll()

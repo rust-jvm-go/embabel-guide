@@ -9,11 +9,6 @@ import java.util.Optional
 interface GuideUserRepository {
 
     /**
-     * Find a GuideUser by Discord user ID
-     */
-    fun findByDiscordUserId(discordUserId: String): Optional<GuideUser>
-
-    /**
      * Find a GuideUser by web user ID
      */
     fun findByWebUserId(webUserId: String): Optional<GuideUser>
@@ -57,15 +52,6 @@ interface GuideUserRepository {
      * Lightweight find by web user ID — skips USES_PERSONA traversal.
      */
     fun findWebUserByWebUserId(webUserId: String): Optional<GuideWebUser>
-
-    /**
-     * Create a new GuideUser with Discord info
-     */
-    fun createWithDiscord(
-        guideUserData: GuideUserData,
-        discordUserInfo: DiscordUserInfoData,
-        persona: PersonaData,
-    ): GuideUser
 
     /**
      * Create a new GuideUser with WebUser info
