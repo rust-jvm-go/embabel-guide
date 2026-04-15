@@ -5,7 +5,7 @@ import com.embabel.agent.api.models.MistralAiModels
 import com.embabel.agent.api.models.OpenAiModels
 import com.embabel.agent.config.models.anthropic.AnthropicModelFactory
 import com.embabel.agent.openai.OpenAiCompatibleModelFactory
-import com.embabel.agent.spi.InvalidApiKeyException
+import com.embabel.common.byok.InvalidApiKeyException
 import com.embabel.agent.spi.LlmService
 import com.embabel.common.ai.model.PricingModel
 import org.slf4j.LoggerFactory
