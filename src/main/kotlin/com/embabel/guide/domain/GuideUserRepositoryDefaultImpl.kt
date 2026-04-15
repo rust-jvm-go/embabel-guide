@@ -17,16 +17,6 @@ class GuideUserRepositoryDefaultImpl(
 ) : GuideUserRepository {
 
     @Transactional(readOnly = true)
-    override fun findByDiscordUserId(discordUserId: String): Optional<GuideUser> {
-        val results = graphObjectManager.loadAll<GuideUser> {
-            where {
-                discordUserInfo.id eq discordUserId
-            }
-        }
-        return Optional.ofNullable(results.firstOrNull())
-    }
-
-    @Transactional(readOnly = true)
     override fun findByWebUserId(webUserId: String): Optional<GuideUser> {
         val results = graphObjectManager.loadAll<GuideUser> {
             where {
@@ -102,20 +92,6 @@ class GuideUserRepositoryDefaultImpl(
             }
         }
         return Optional.ofNullable(results.firstOrNull())
-    }
-
-    @Transactional
-    override fun createWithDiscord(
-        guideUserData: GuideUserData,
-        discordUserInfo: DiscordUserInfoData,
-        persona: PersonaData,
-    ): GuideUser {
-        val guideUser = GuideUser(
-            core = guideUserData,
-            discordUserInfo = discordUserInfo,
-            persona = persona,
-        )
-        return graphObjectManager.save(guideUser)
     }
 
     @Transactional

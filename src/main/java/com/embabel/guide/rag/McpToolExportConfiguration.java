@@ -1,5 +1,6 @@
 package com.embabel.guide.rag;
 
+import com.embabel.agent.filter.PropertyFilter;
 import com.embabel.agent.mcpserver.McpToolExport;
 import com.embabel.agent.rag.neo.drivine.DrivineStore;
 import com.embabel.agent.rag.tools.ToolishRag;
@@ -40,6 +41,15 @@ class McpToolExportConfiguration {
                 "Embabel docs",
                 drivineStore
         );
+        var activeVersion = properties.getContent().getActiveVersion();
+        if (activeVersion != null) {
+            var versionFilter = new PropertyFilter.In(
+                    "version",
+                    List.of(activeVersion, VersionChunkTransformer.SUPPLEMENTARY)
+            );
+            toolishRag = toolishRag.withMetadataFilter(versionFilter);
+        }
+        return McpToolExport.fromLlmReference(
         return withTimeouts(McpToolExport.fromLlmReference(
                 toolishRag,
                 properties.toolNamingStrategy()

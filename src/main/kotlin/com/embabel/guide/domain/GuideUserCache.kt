@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * In-memory cache for GuideUser lookups, keyed by webUserId or Discord user ID.
+ * In-memory cache for GuideUser lookups, keyed by webUserId.
  * Eliminates repeated Neo4j reads for the same user within and across requests.
  *
  * Invalidate on any write that changes user state visible to ChatActions:

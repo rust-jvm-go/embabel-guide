@@ -2,13 +2,18 @@ package com.embabel.hub
 
 import com.embabel.guide.chat.model.DeliveredMessage
 import com.embabel.guide.chat.service.ChatSessionService
+import com.embabel.guide.domain.FeedbackData
+import com.embabel.guide.domain.FeedbackRepository
+import com.embabel.guide.domain.FeedbackView
 import com.embabel.guide.domain.GuideUser
 import com.embabel.guide.domain.GuideUserService
 import io.jsonwebtoken.JwtException
 import org.slf4j.LoggerFactory
+import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.core.Authentication
 import java.time.Instant
+import java.util.UUID
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
@@ -26,7 +31,8 @@ class HubApiController(
     private val personaService: PersonaService,
     private val guideUserService: GuideUserService,
     private val chatSessionService: ChatSessionService,
-    private val jwtTokenService: JwtTokenService
+    private val jwtTokenService: JwtTokenService,
+    private val feedbackRepository: FeedbackRepository,
 ) {
 
     private val logger = LoggerFactory.getLogger(HubApiController::class.java)
@@ -172,6 +178,35 @@ class HubApiController(
         }
 
         return chatSession.messages.map { DeliveredMessage.createFrom(it, sessionId, chatSession.session.title) }
+    }
+
+    data class FeedbackRequest(
+        val page: String,
+        val helpful: Boolean,
+        val comment: String? = null,
+    )
+
+    @PostMapping("/feedback")
+    fun submitFeedback(
+        @RequestBody request: FeedbackRequest,
+        authentication: Authentication?,
+    ): ResponseEntity<Unit> {
+        val userId = authentication?.principal as? String
+        val guideUser = if (userId != null) {
+            guideUserService.findByWebUserId(userId).orElse(null)
+        } else {
+            guideUserService.findOrCreateAnonymousWebUser()
+        }
+
+        val feedbackData = FeedbackData(
+            id = UUID.randomUUID().toString(),
+            page = request.page,
+            helpful = request.helpful,
+            comment = request.comment,
+            userId = userId,
+        )
+        feedbackRepository.save(FeedbackView(feedback = feedbackData, user = guideUser?.core))
+        return ResponseEntity.status(HttpStatus.CREATED).build()
     }
 
     /**

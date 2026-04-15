@@ -5,10 +5,11 @@ import com.embabel.agent.api.annotation.EmbabelComponent
 import com.embabel.agent.api.common.ActionContext
 import com.embabel.agent.api.common.PromptRunner
 import com.embabel.agent.api.identity.User
-import com.embabel.agent.discord.DiscordUser
 import com.embabel.agent.rag.neo.drivine.DrivineStore
+import com.embabel.agent.filter.PropertyFilter
 import com.embabel.agent.rag.tools.ToolishRag
 import com.embabel.agent.rag.tools.TryHyDE
+import com.embabel.guide.rag.VersionChunkTransformer
 import com.embabel.chat.AssistantMessage
 import com.embabel.chat.Message
 import com.embabel.chat.ChatTrigger
@@ -27,8 +28,6 @@ import com.embabel.guide.domain.GuideUserCache
 import com.embabel.guide.domain.GuideUserRepository
 import com.embabel.guide.domain.GuideUserService
 import com.embabel.guide.domain.HasGuideUserData
-import com.embabel.guide.util.toDiscordUserInfoData
-import com.embabel.guide.util.toGuideUserData
 import com.embabel.guide.narrator.NarrationCache
 import com.embabel.guide.narrator.NarratorAgent
 import com.embabel.guide.rag.DataManager
@@ -199,18 +198,6 @@ class ChatActions(
             logger.warn("user is null: Cannot create or fetch GuideUser")
             null
         }
-        is DiscordUser -> {
-            val cacheKey = "discord:${user.id}"
-            guideUserCache.get(cacheKey) ?: guideUserRepository.findByDiscordUserId(user.id)
-                .orElseGet {
-                    val created = guideUserService.saveFromDiscordUser(
-                        user.toGuideUserData(), user.toDiscordUserInfoData()
-                    )
-                    logger.info("Created new Discord user: {}", created)
-                    created
-                }
-                .also { guideUserCache.put(cacheKey, it) }
-        }
         is GuideUser -> {
             val webUserId = user.webUser?.id
             if (webUserId != null) {
@@ -239,9 +226,20 @@ class ChatActions(
                     "docs",
                     "Embabel docs",
                     drivineStore,
-                ).withHint(TryHyDE.usingConversationContext())
+                ).let { rag ->
+                    val filter = versionFilter()
+                    if (filter != null) rag.withMetadataFilter(filter) else rag
+                }.withHint(TryHyDE.usingConversationContext())
             )
             .rendering("guide_system")
+    }
+
+    private fun versionFilter(): PropertyFilter? {
+        val version = guideProperties.content.activeVersion ?: return null
+        return PropertyFilter.In(
+            "version",
+            listOf(version, VersionChunkTransformer.SUPPLEMENTARY),
+        )
     }
 
     private fun buildTemplateModel(guideUser: GuideUser, messages: List<Message>): MutableMap<String, Any> {

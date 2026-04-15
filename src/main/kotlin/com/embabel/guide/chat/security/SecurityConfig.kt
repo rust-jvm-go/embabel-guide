@@ -91,6 +91,7 @@ class SecurityConfig(
                     "/api/hub/register",
                     "/api/hub/login",
                     "/api/hub/refresh",
+                    "/api/hub/feedback",
                     "/api/v1/data/load-references",
                     "/api/hub/integrations/keys/validate",
                     "/api/hub/oauth/*/callback",
