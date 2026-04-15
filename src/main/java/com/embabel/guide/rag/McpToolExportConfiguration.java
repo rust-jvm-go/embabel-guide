@@ -49,7 +49,6 @@ class McpToolExportConfiguration {
             );
             toolishRag = toolishRag.withMetadataFilter(versionFilter);
         }
-        return McpToolExport.fromLlmReference(
         return withTimeouts(McpToolExport.fromLlmReference(
                 toolishRag,
                 properties.toolNamingStrategy()
