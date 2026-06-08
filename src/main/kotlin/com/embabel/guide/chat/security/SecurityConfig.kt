@@ -49,7 +49,9 @@ class SecurityConfig(
 
     val actuatorPatterns = arrayOf(
         "/actuator",
-        "/actuator/**",
+        "/actuator/health",
+        "/actuator/health/**",
+        "/actuator/info",
     )
 
     val permittedPatterns = arrayOf(

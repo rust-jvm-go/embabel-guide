@@ -27,21 +27,21 @@ import com.embabel.agent.rag.ingestion.TikaHierarchicalContentReader;
 import kotlin.Pair;
 
 import java.util.ArrayList;
-import com.embabel.agent.rag.neo.drivine.DrivineCypherSearch;
-import com.embabel.agent.rag.neo.drivine.DrivineStore;
-import com.embabel.agent.rag.neo.drivine.NeoRagServiceProperties;
-import com.embabel.common.ai.autoconfig.ProviderInitialization;
+import com.embabel.agent.rag.graph.DrivineCypherSearch;
+import com.embabel.agent.rag.graph.DrivineStore;
+import com.embabel.agent.rag.graph.GraphRagServiceProperties;
+import com.embabel.agent.rag.graph.dialect.RagDialect;
 import com.embabel.common.ai.model.EmbeddingService;
 import com.embabel.guide.GuideProperties;
+import org.drivine.connection.DataSourceMap;
 import org.drivine.manager.PersistenceManager;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.context.annotation.Primary;
 import org.springframework.transaction.PlatformTransactionManager;
-
-import java.util.List;
 
 /**
  * Configuration for RAG (Retrieval Augmented Generation) components.
@@ -52,7 +52,8 @@ import java.util.List;
  * runs first so the EmbeddingService bean exists when this configuration is wired.
  */
 @Configuration
-@EnableConfigurationProperties(NeoRagServiceProperties.class)
+@EnableConfigurationProperties(GraphRagServiceProperties.class)
+@DependsOn("onnxEmbeddingInitializer")
 class RagConfiguration {
 
     @Bean
@@ -84,22 +85,25 @@ class RagConfiguration {
     DrivineStore drivineStore(
             @Qualifier("neo") PersistenceManager persistenceManager,
             PlatformTransactionManager platformTransactionManager,
-            List<ProviderInitialization> providerInitializations,
             EmbeddingService embeddingService,
             ChunkTransformer chunkTransformer,
-            NeoRagServiceProperties neoRagProperties,
-            GuideProperties guideProperties) {
-        ContentChunker.Config chunkerConfig = guideProperties.getChunkerConfig() != null
+            GraphRagServiceProperties graphRagProperties,
+            GuideProperties guideProperties,
+            DataSourceMap dataSourceMap) {
+        var chunkerConfig = guideProperties.getChunkerConfig() != null
                 ? guideProperties.getChunkerConfig()
                 : new ContentChunker.Config();
+        var databaseType = dataSourceMap.getDataSources().get("neo").getType();
+        var dialect = RagDialect.Companion.forDatabaseType(databaseType);
         return new DrivineStore(
                 persistenceManager,
-                neoRagProperties,
+                graphRagProperties,
                 chunkerConfig,
                 chunkTransformer,
                 embeddingService,
                 platformTransactionManager,
-                new DrivineCypherSearch(persistenceManager)
+                new DrivineCypherSearch(persistenceManager),
+                dialect
         );
     }
 }
