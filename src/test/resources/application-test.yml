@@ -61,6 +61,7 @@ embabel:
     llms:
       best: test-llm
       cheapest: test-llm
+      summarizer: test-llm
 
 # Logging configuration for tests
 logging:

@@ -152,14 +152,12 @@ embabel:
     llms:
       summarizer: ${EMBABEL_MODELS_LLMS_SUMMARIZER:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
 
-    # Change this if you wish to use a non Open AI default embedding model
-    default-embedding-model: ${EMBABEL_MODELS_DEFAULTEMBEDDINGMODEL:${OLLAMA_EMBEDDING_MODEL:qwen3-embedding:0.6b}}
+    # Default is the local ONNX embedding model (no API key needed).
+    # Set EMBABEL_MODELS_DEFAULTEMBEDDINGMODEL to override.
+    default-embedding-model: ${EMBABEL_MODELS_DEFAULTEMBEDDINGMODEL:all-MiniLM-L6-v2}
 
     # Change this to use a non Open AI default LLM
     default-llm: ${EMBABEL_MODELS_DEFAULTLLM:${OLLAMA_CHAT_MODEL:nemotron-3-super:cloud}}
-
-    # Local ONNX embedding model (no API key needed)
-    # default-embedding-model: all-MiniLM-L6-v2
 
     # Fake LLM — real models are resolved per-user via BYOK (UserLlmResolver)
     # default-llm: setup-required
@@ -170,15 +168,7 @@ embabel:
       models:
         onnx:
           embeddings:
-            enabled: false
-
-    # To switch back to local ONNX embeddings, set `enabled` above to true and uncomment the
-    # `default-embedding-model: all-MiniLM-L6-v2` line above and this block below.
-    # platform:
-    #   models:
-    #     onnx:
-    #       embeddings:
-    #         cache-dir: ${user.home}/.embabel/models
+            cache-dir: ${user.home}/.embabel/models
 
     rag:
       graph:
