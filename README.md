@@ -1,21 +1,21 @@
-![Build](https://github.com/embabel/embabel-agent/actions/workflows/maven.yml/badge.svg)
+<a href="https://hub.embabel.com"><img align="left" src="logo.png" width="240"></a>
 
-![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white)
-![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white)
-![Apache Tomcat](https://img.shields.io/badge/apache%20tomcat-%23F8DC75.svg?style=for-the-badge&logo=apache-tomcat&logoColor=black)
-![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white)
-![ChatGPT](https://img.shields.io/badge/chatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white)
-![JSON](https://img.shields.io/badge/JSON-000?logo=json&logoColor=fff)
-![GitHub Actions](https://img.shields.io/badge/github%20actions-%232671E5.svg?style=for-the-badge&logo=githubactions&logoColor=white)
-![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
-![IntelliJ IDEA](https://img.shields.io/badge/IntelliJIDEA-000000.svg?style=for-the-badge&logo=intellij-idea&logoColor=white)
+### **Embabel Guide : Chat and MCP Server**
 
-# Embabel Guide : Chat and MCP Server
+![Build](https://github.com/embabel/embabel-agent/actions/workflows/maven.yml/badge.svg) [![Embabel](https://img.shields.io/badge/Embabel-Agent_Framework-6C3483?style=for-the-badge)](https://github.com/embabel/embabel-agent) ![Java](https://img.shields.io/badge/java-%23ED8B00.svg?style=for-the-badge&logo=openjdk&logoColor=white) ![Spring](https://img.shields.io/badge/spring-%236DB33F.svg?style=for-the-badge&logo=spring&logoColor=white) ![Apache Maven](https://img.shields.io/badge/Apache%20Maven-C71A36?style=for-the-badge&logo=Apache%20Maven&logoColor=white) ![ChatGPT](https://img.shields.io/badge/chatGPT-74aa9c?style=for-the-badge&logo=openai&logoColor=white) ![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
 
-<img src="https://github.com/embabel/embabel-agent/blob/main/embabel-agent-api/images/315px-Meister_der_Weltenchronik_001.jpg?raw=true" width="180">
+<br clear="left"/>
 
 Guide exposes resources relating to the Embabel Agent Framework, such
 as documentation, relevant blogs and other content, and up-to-the-minute API information.
+
+This repository is the backend for [Embabel Hub](https://hub.embabel.com) — the Guide powers the
+natural-language "Talk to the Docs" experience there.
+
+## Links
+
+- [Embabel Hub](https://hub.embabel.com) — talk to the docs, powered by this Guide
+- [Embabel Agent Framework](https://github.com/embabel/embabel-agent)
 
 <p align="center">
   <a href="https://www.youtube.com/watch?v=hY6ZFMIJdd4" target="_blank">
@@ -439,8 +439,8 @@ The Dockerfile uses a multi-stage build that compiles the application from sourc
 - ⚠️ First build takes ~2-3 minutes (Maven compilation inside Docker)
 
 The build process:
-1. Stage 1: Uses `maven:3.9.9-eclipse-temurin-21` to compile the application
-2. Stage 2: Uses lightweight `eclipse-temurin:21-jre-jammy` runtime image with the compiled JAR
+1. Stage 1: Uses `maven:3.9-eclipse-temurin-25` to compile the application
+2. Stage 2: Uses lightweight `eclipse-temurin:25-jre-jammy` runtime image with the compiled JAR
 
 This approach ensures consistency across environments and simplifies onboarding for new contributors.
 
@@ -552,6 +552,11 @@ export OPENAI_API_KEY=sk-your-key-here
 ```
 
 2. **Neo4j**: See the [Local vs CI Testing](#local-vs-ci-testing) section below.
+
+3. **A JDK between 21 and 25**. The build targets Java 21 bytecode, so the resulting jar
+   runs on any JRE 21+, but it builds on anything up to 25 — CI runs the suite on both 21
+   and 25. If you raise `<java.version>` in the pom, note that Kotlin must be 2.3.0+ to
+   target 25 at all, and the `codegen-gradle` Kotlin version has to move with it.
 
 ### Local vs CI Testing
 
