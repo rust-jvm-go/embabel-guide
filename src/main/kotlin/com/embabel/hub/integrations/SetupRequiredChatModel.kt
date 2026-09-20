@@ -5,7 +5,7 @@ import org.springframework.ai.chat.model.ChatModel
 import org.springframework.ai.chat.model.ChatResponse
 import org.springframework.ai.chat.model.Generation
 import org.springframework.ai.chat.prompt.ChatOptions
-import org.springframework.ai.chat.prompt.DefaultChatOptions
+import org.springframework.ai.chat.prompt.DefaultChatOptionsBuilder
 import org.springframework.ai.chat.prompt.Prompt
 
 /**
@@ -21,7 +21,7 @@ class SetupRequiredChatModel : ChatModel {
         return ChatResponse(listOf(Generation(message)))
     }
 
-    override fun getDefaultOptions(): ChatOptions = DefaultChatOptions()
+    override fun getDefaultOptions(): ChatOptions = DefaultChatOptionsBuilder().build()
 
     companion object {
         const val MODEL_NAME = "setup-required"

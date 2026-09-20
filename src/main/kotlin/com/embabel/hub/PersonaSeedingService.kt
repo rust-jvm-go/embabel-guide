@@ -6,7 +6,6 @@ import com.embabel.guide.domain.PersonaRepository
 import com.embabel.guide.domain.PersonaRepository.Companion.SYSTEM_OWNER_ID
 import com.embabel.guide.domain.PersonaView
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.drivine.manager.GraphObjectManager
 import org.drivine.manager.load
 import org.slf4j.LoggerFactory
@@ -17,6 +16,7 @@ import org.springframework.core.io.Resource
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.nio.charset.StandardCharsets
 import java.util.UUID
 

@@ -1,6 +1,5 @@
 package com.embabel.hub
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import io.jsonwebtoken.ExpiredJwtException
 import io.jsonwebtoken.JwtException
 import jakarta.servlet.FilterChain
@@ -12,6 +11,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder
 import org.springframework.stereotype.Component
 import org.springframework.web.filter.OncePerRequestFilter
+import tools.jackson.databind.json.JsonMapper
 import java.time.Instant
 
 /**
@@ -24,7 +24,7 @@ import java.time.Instant
 @Component
 class JwtAuthenticationFilter(
     private val jwtTokenService: JwtTokenService,
-    private val objectMapper: ObjectMapper
+    private val objectMapper: JsonMapper
 ) : OncePerRequestFilter() {
 
     override fun shouldNotFilter(request: HttpServletRequest): Boolean {

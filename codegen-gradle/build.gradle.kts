@@ -19,7 +19,7 @@ plugins {
 group = "com.embabel.guide"
 version = "0.1.0-SNAPSHOT"
 
-val drivineVersion = "0.0.28"
+val drivineVersion = "0.0.79"
 
 repositories {
     mavenCentral()
@@ -40,7 +40,7 @@ dependencies {
     ksp("org.drivine:drivine4j-codegen:$drivineVersion")
 
     // Dependencies needed for domain classes to compile
-    implementation("com.embabel.agent:embabel-agent-api:0.3.2-SNAPSHOT")
+    implementation("com.embabel.agent:embabel-agent-api:1.5.2")
     implementation("com.fasterxml.jackson.core:jackson-annotations:2.18.2")
 }
 

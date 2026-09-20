@@ -7,12 +7,12 @@ import com.embabel.hub.integrations.LlmProvider
 import com.embabel.hub.integrations.UserKeyStore
 import com.embabel.hub.integrations.UserModelFactory
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.messages.SystemMessage
 import org.springframework.ai.chat.messages.UserMessage
 import org.springframework.ai.chat.prompt.Prompt
 import org.springframework.stereotype.Service
+import tools.jackson.module.kotlin.jacksonObjectMapper
 import java.util.UUID
 
 /**
@@ -159,7 +159,7 @@ class PersonaIngestionService(
                 )
             )
         )
-        val text = response.result.output.text ?: return ClassifyResponse(safe = false, reason = "Empty response from LLM.")
+        val text = response.result?.output?.text ?: return ClassifyResponse(safe = false, reason = "Empty response from LLM.")
         return try {
             // Strip markdown code fences if present
             val json = text.trim().removePrefix("```json").removePrefix("```").removeSuffix("```").trim()

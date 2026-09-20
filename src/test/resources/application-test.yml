@@ -44,13 +44,15 @@ spring:
     exclude:
       - com.embabel.agent.autoconfigure.models.onnx.AgentOnnxAutoConfiguration
 
-embabel.agent.platform.models.onnx.embeddings:
-  enabled: false
-
 embabel:
-  agent-platform:
-    scanning:
-      auto: false
+  agent:
+    platform:
+      scanning:
+        auto: false
+      models:
+        onnx:
+          embeddings:
+            enabled: false
 
   models:
     default-llm: test-llm
